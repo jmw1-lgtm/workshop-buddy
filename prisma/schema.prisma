@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum JobStatus {
+  BOOKED
+  ARRIVED
+  IN_PROGRESS
+  WAITING_PARTS
+  WAITING_COLLECTION
+  COMPLETED
+  CANCELLED
+}
+
+model Workshop {
+  id                   String         @id @default(cuid())
+  clerkOrgId           String?        @unique
+  name                 String
+  slug                 String         @unique
+  email                String?
+  phone                String?
+  addressLine1         String?
+  addressLine2         String?
+  town                 String?
+  postcode             String?
+  slotLengthMins       Int            @default(60)
+  stripeCustomerId     String?        @unique
+  stripeSubscriptionId String?        @unique
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  customers            Customer[]
+  vehicles             Vehicle[]
+  jobs                 Job[]
+  jobTypes             JobType[]
+  memberships          WorkshopUser[]
+}
+
+model WorkshopUser {
+  id          String   @id @default(cuid())
+  workshopId  String
+  clerkUserId String
+  role        String   @default("owner")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workshop    Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+
+  @@unique([workshopId, clerkUserId])
+  @@index([clerkUserId])
+}
+
+model Customer {
+  id         String    @id @default(cuid())
+  workshopId String
+  name       String
+  phone      String?
+  email      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  workshop   Workshop  @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  vehicles   Vehicle[]
+  jobs       Job[]
+
+  @@index([workshopId, name])
+}
+
+model Vehicle {
+  id           String    @id @default(cuid())
+  workshopId   String
+  customerId   String
+  registration String
+  make         String?
+  model        String?
+  fuel         String?
+  engine       String?
+  year         Int?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  workshop     Workshop  @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  customer     Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  jobs         Job[]
+
+  @@unique([workshopId, registration])
+  @@index([workshopId, customerId])
+}
+
+model JobType {
+  id         String    @id @default(cuid())
+  workshopId String
+  name       String
+  colour     String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  workshop   Workshop  @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  jobs       Job[]
+
+  @@unique([workshopId, name])
+}
+
+model Job {
+  id             String     @id @default(cuid())
+  workshopId     String
+  customerId     String
+  vehicleId      String
+  jobTypeId      String
+  status         JobStatus  @default(BOOKED)
+  scheduledStart DateTime
+  durationMins   Int
+  notes          String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  workshop       Workshop   @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  customer       Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  vehicle        Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  jobType        JobType    @relation(fields: [jobTypeId], references: [id], onDelete: Restrict)
+
+  @@index([workshopId, scheduledStart])
+  @@index([workshopId, status])
+}

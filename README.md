@@ -1,74 +1,34 @@
 # Workshop Buddy
 
-Workshop Buddy is a SaaS platform designed for **independent vehicle workshops**.
+Production-minded SaaS foundation for independent vehicle workshops.
 
-It replaces paper-based workshop diaries with a simple digital system for managing jobs, customers, and vehicles.
+## Stack
 
----
-
-## Key Features
-
-- Workshop diary
-- Job cards
-- Customer management
-- Vehicle history
-- DVLA vehicle lookup
-- Job status workflow
-- Printable job cards
-- SaaS subscriptions
-
----
-
-## Tech Stack
-
-Workshop Buddy is built with:
-
-- Next.js (App Router)
+- Next.js App Router
 - TypeScript
 - Tailwind CSS
-- shadcn/ui
-- Clerk (authentication)
+- shadcn/ui-style component setup
+- Clerk authentication
 - Prisma ORM
-- Supabase Postgres
-- Stripe (billing)
-- Vercel (deployment)
+- Supabase PostgreSQL
+- Stripe billing scaffolding
 
----
+## Setup
 
-## Project Structure
-app/
-components/
-lib/
-prisma/
-docs/
+1. Copy `.env.example` to `.env.local`.
+2. Add Clerk, Supabase Postgres, and Stripe credentials.
+3. Run `npm install`.
+4. Generate Prisma client with `npm run db:generate`.
+5. Start the app with `npm run dev`.
 
+## Current scope
 
----
+- Public marketing homepage
+- Protected authenticated app shell
+- Placeholder dashboard, diary, customers, and settings routes
+- Multi-tenant data model foundation with `workshopId` on application records
+- Stripe webhook endpoint scaffold
 
-## Development Philosophy
+## Next implementation step
 
-Workshop Buddy is built with the following priorities:
-
-1. Fast workflows
-2. Simple UI
-3. Clean architecture
-4. Production-ready SaaS foundations
-
----
-
-## Product Vision
-
-Workshop Buddy aims to become the **operating system for small garages**.
-
-The system revolves around **Jobs**.
-
-Diary → Job → Job Card → Completed
-
-
-The diary is the visual schedule of jobs.
-
----
-
-## Status
-
-Early development stage.
+Persist workshop membership and onboarding so Clerk users can be linked to a real `Workshop` before feature data is added.
