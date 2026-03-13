@@ -3,9 +3,6 @@
 import { JobStatus } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { CSSProperties } from "react";
-
-import { jobStatusLabels } from "@/lib/job-status";
 import { cn } from "@/lib/utils";
 
 type DiaryJobCardProps = {
@@ -40,13 +37,10 @@ export function DiaryJobCard({
   const router = useRouter();
   const [isDragging, setIsDragging] = useState(false);
 
-  const statusTone = getStatusTone(job.status);
-  const statusLabel = job.status === "BOOKED" ? "Scheduled" : jobStatusLabels[job.status];
   const resolvedDensity = compact ? "small" : density ?? "large";
   const isWeekView = view === "week";
   const showCustomer = resolvedDensity === "medium" || resolvedDensity === "large";
-  const showJobType = resolvedDensity === "large";
-  const showDuration = resolvedDensity === "large";
+  const bottomMeta = `${job.durationMins} minutes`;
   const weekSecondary = resolvedDensity === "small" ? job.jobTypeName : job.customerName;
 
   return (
@@ -80,22 +74,21 @@ export function DiaryJobCard({
         onDragEnd?.();
       }}
       className={cn(
-        "relative flex h-full w-full min-w-0 max-w-full cursor-pointer flex-col overflow-hidden rounded-3xl border text-left shadow-[0_14px_30px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-px hover:border-[var(--primary)]/30 hover:shadow-[0_18px_34px_rgba(15,23,42,0.12)]",
+        "relative flex h-full min-h-14 w-full min-w-0 max-w-full cursor-pointer flex-col overflow-hidden rounded-3xl border border-[var(--surface-border)] text-left shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-px hover:border-[var(--primary)]/20 hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)]",
         isWeekView ? (resolvedDensity === "small" ? "p-3.5" : "p-4") : resolvedDensity === "small" ? "p-3" : "p-4",
         isPending ? "cursor-wait opacity-70" : "",
         isDragging ? "z-20 -translate-y-1 shadow-[0_22px_42px_rgba(15,23,42,0.18)]" : "",
       )}
       style={{
-        borderColor: `${job.jobTypeColor}45`,
         backgroundColor: colorWithAlpha(
           job.jobTypeColor,
-          resolvedDensity === "small" ? 0.1 : 0.14,
+          resolvedDensity === "small" ? 0.05 : 0.07,
         ),
       }}
       aria-label={`Open job card for ${job.vehicleRegistration}`}
     >
       <span
-        className="absolute inset-y-0 left-0 w-1.5"
+        className="absolute inset-y-0 left-0 w-2"
         style={{ backgroundColor: job.jobTypeColor }}
         aria-hidden="true"
       />
@@ -124,20 +117,6 @@ export function DiaryJobCard({
               {job.vehicleRegistration}
             </p>
           </div>
-          <span
-            className={cn(
-              "rounded-full font-semibold",
-              isWeekView
-                ? "max-w-[40%] truncate px-2 py-1 text-[10px]"
-                : resolvedDensity === "small"
-                  ? "shrink-0 px-2 py-1 text-[10px]"
-                  : "shrink-0 px-2.5 py-1 text-[11px]",
-            )}
-            style={statusTone}
-            title={statusLabel}
-          >
-            {statusLabel}
-          </span>
         </div>
         {isWeekView ? (
           <div className="min-w-0">
@@ -145,77 +124,28 @@ export function DiaryJobCard({
               {weekSecondary}
             </p>
           </div>
-        ) : showCustomer ? (
+        ) : (
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold" style={{ color: job.jobTypeColor }}>
+              {job.jobTypeName}
+            </p>
+          </div>
+        )}
+        {!isWeekView && showCustomer ? (
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-[var(--foreground)]">
               {job.customerName}
             </p>
           </div>
         ) : null}
-        {showJobType ? (
-          <div>
-            <span
-              className="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold"
-              style={{
-                backgroundColor: colorWithAlpha(job.jobTypeColor, 0.16),
-                color: job.jobTypeColor,
-              }}
-            >
-              {job.jobTypeName}
-            </span>
-          </div>
-        ) : null}
         {isWeekView ? null : (
-          <div className="mt-auto flex items-center justify-between gap-3 text-xs text-[var(--muted-foreground)]">
-            {showDuration ? <span>{job.durationMins} minutes</span> : <span>{job.jobTypeName}</span>}
-            {resolvedDensity === "large" && isPending ? (
-              <span className="font-semibold text-[var(--primary)]">Moving...</span>
-            ) : null}
+          <div className="mt-auto text-xs font-medium text-[var(--muted-foreground)]">
+            <span className="truncate">{bottomMeta}</span>
           </div>
         )}
       </div>
     </article>
   );
-}
-
-function getStatusTone(status: JobStatus): CSSProperties {
-  switch (status) {
-    case "BOOKED":
-      return {
-        backgroundColor: "rgba(15, 118, 110, 0.12)",
-        color: "var(--primary)",
-      };
-    case "ARRIVED":
-      return {
-        backgroundColor: "rgba(37, 99, 235, 0.12)",
-        color: "#2563eb",
-      };
-    case "IN_PROGRESS":
-      return {
-        backgroundColor: "rgba(15, 118, 110, 0.16)",
-        color: "var(--primary-strong)",
-      };
-    case "WAITING_PARTS":
-      return {
-        backgroundColor: "rgba(217, 119, 6, 0.14)",
-        color: "#b45309",
-      };
-    case "WAITING_COLLECTION":
-      return {
-        backgroundColor: "rgba(59, 130, 246, 0.14)",
-        color: "#1d4ed8",
-      };
-    case "COMPLETED":
-      return {
-        backgroundColor: "rgba(22, 163, 74, 0.14)",
-        color: "#15803d",
-      };
-    case "CANCELLED":
-      return {
-        backgroundColor: "rgba(239, 68, 68, 0.12)",
-        color: "#b91c1c",
-      };
-  }
 }
 
 function colorWithAlpha(color: string, alpha: number) {

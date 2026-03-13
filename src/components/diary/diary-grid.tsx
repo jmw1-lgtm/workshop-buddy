@@ -210,13 +210,13 @@ export function DiaryGrid({
             </div>
 
             <div
-              className="pointer-events-none absolute inset-0 grid p-2"
+              className="pointer-events-none absolute inset-0 grid"
               style={slotStyle}
             >
               {jobs.map((job) => (
                 <div
                   key={job.id}
-                  className="pointer-events-auto min-h-0 p-1"
+                  className="pointer-events-auto min-h-0 px-1.5 py-px"
                   style={{
                     gridRow: `${job.slotIndex + 1} / span ${job.slotSpan}`,
                   }}

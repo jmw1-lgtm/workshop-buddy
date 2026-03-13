@@ -208,7 +208,7 @@ export function WeekDiaryGrid({
                       cluster.jobs.length === 1 ? (
                         <div
                           key={cluster.jobs[0].id}
-                          className="pointer-events-auto min-h-0 min-w-0 px-3 py-2"
+                          className="pointer-events-auto min-h-0 min-w-0 px-2.5 py-1.5"
                           style={{
                             gridRow: `${cluster.slotIndex + 1} / span ${cluster.slotSpan}`,
                           }}
@@ -239,7 +239,7 @@ export function WeekDiaryGrid({
                       ) : (
                         <div
                           key={`${day.dateParam}-${cluster.slotIndex}-${cluster.slotSpan}`}
-                          className="pointer-events-auto min-h-0 min-w-0 px-3 py-2"
+                          className="pointer-events-auto min-h-0 min-w-0 px-2.5 py-1.5"
                           style={{
                             gridRow: `${cluster.slotIndex + 1} / span ${cluster.slotSpan}`,
                           }}

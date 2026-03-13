@@ -9,23 +9,23 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 const featureCards = [
   {
     icon: "calendar_month",
-    title: "Smart diary scheduling",
-    description: "Book work into a clear day view without the paper diary slowdown.",
+    title: "Smart workshop diary scheduling",
+    description: "Book jobs into a clear day view and keep technician time organised without the paper diary.",
   },
   {
     icon: "open_with",
-    title: "Drag-and-drop rescheduling",
-    description: "Move jobs fast when the day changes or a customer runs late.",
+    title: "Drag-and-drop job rescheduling",
+    description: "Move bookings quickly when the day changes or a customer runs late.",
   },
   {
     icon: "history",
     title: "Customer and vehicle history",
-    description: "Keep every registration, vehicle, and repeat customer in one place.",
+    description: "Keep registrations, vehicles, and repeat customers organised in one place.",
   },
   {
     icon: "description",
     title: "Job cards and printable worksheets",
-    description: "Capture the booking once, then open or print clean job sheets.",
+    description: "Capture the booking once, then open or print clear job sheets for the workshop.",
   },
 ];
 
@@ -33,17 +33,17 @@ const workflowSteps = [
   {
     number: "1",
     title: "Book the job",
-    description: "Add the customer, look up the vehicle, and place the work into the diary.",
+    description: "Add the customer, find the vehicle, and place the work into the workshop diary.",
   },
   {
     number: "2",
     title: "Run the day",
-    description: "Reschedule quickly, track arrivals, and keep workshop capacity visible.",
+    description: "Reschedule jobs quickly, track arrivals, and keep technician capacity visible.",
   },
   {
     number: "3",
     title: "Complete and collect",
-    description: "Update the job card, print where needed, and keep customer history tidy.",
+    description: "Update the job card, print worksheets if needed, and keep customer history organised.",
   },
 ];
 
@@ -374,8 +374,8 @@ export function MarketingHomePage() {
         <div className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
           <SectionIntro
             eyebrow="Features"
-            title="The core tools a small workshop uses every day."
-            description="Four focused features keep the product practical, fast, and easy to learn."
+            title="Core tools for running a busy workshop"
+            description="Four essential tools to manage bookings, jobs, and customers without the paper diary."
           />
 
           <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -402,8 +402,8 @@ export function MarketingHomePage() {
       <section id="how-it-works" className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
         <SectionIntro
           eyebrow="Workflow"
-          title="Three steps from booking to collection."
-          description="The product follows the natural flow of a small independent workshop."
+          title="From booking to collection in three simple steps"
+          description="Designed around how a small independent garage actually runs."
         />
 
         <div className="mt-10 grid gap-5 lg:grid-cols-3">
