@@ -1,3 +1,5 @@
+import { openBillingPortal } from "@/app/(app)/account/actions";
+import { ManageBillingButton } from "@/components/billing/manage-billing-button";
 import { Button } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/layout/material-icon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +18,7 @@ type AccountPageProps = {
   searchParams?: Promise<{
     checkout?: string;
     error?: string;
+    portalError?: string;
   }>;
 };
 
@@ -33,6 +36,8 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
         )
       : null;
   const errorMessage = getCheckoutErrorMessage(resolvedSearchParams?.error);
+  const portalErrorMessage = getPortalErrorMessage(resolvedSearchParams?.portalError);
+  const canManageBilling = Boolean(subscription?.stripeCustomerId);
 
   return (
     <AppPage>
@@ -51,6 +56,15 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             icon="error"
             title="Unable to start checkout"
             description={errorMessage}
+            tone="error"
+          />
+        ) : null}
+
+        {portalErrorMessage ? (
+          <AccountStatusBanner
+            icon="error"
+            title="Unable to open billing portal"
+            description={portalErrorMessage}
             tone="error"
           />
         ) : null}
@@ -111,7 +125,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           <CardHeader className="pb-3">
             <CardTitle>Billing management</CardTitle>
             <CardDescription>
-              Manage subscription, payment method, and invoice history through Stripe.
+              Manage subscription, payment method, invoices, and cancellation through Stripe.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 pt-0">
@@ -123,9 +137,22 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
                 <li>{billingCopy.refundNotice}</li>
               </ul>
             </div>
-            <Button type="button" variant="outline" disabled>
-              Manage billing
-            </Button>
+            {canManageBilling ? (
+              <form action={openBillingPortal} className="flex items-start">
+                <input type="hidden" name="returnPath" value="/account" />
+                <ManageBillingButton />
+              </form>
+            ) : (
+              <div className="grid gap-3">
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  The billing portal becomes available after a Stripe customer record exists.
+                  Trial-only workshops can upgrade from the plan options above.
+                </p>
+                <Button type="button" variant="outline" disabled>
+                  Manage billing
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </section>
@@ -141,6 +168,19 @@ function getCheckoutErrorMessage(error?: string) {
   switch (error) {
     case "checkout-unavailable":
       return "Stripe checkout is temporarily unavailable. Please try again.";
+    default:
+      return decodeURIComponent(error);
+  }
+}
+
+function getPortalErrorMessage(error?: string) {
+  if (!error) {
+    return null;
+  }
+
+  switch (error) {
+    case "portal-unavailable":
+      return "Stripe billing portal is temporarily unavailable. Please try again.";
     default:
       return decodeURIComponent(error);
   }

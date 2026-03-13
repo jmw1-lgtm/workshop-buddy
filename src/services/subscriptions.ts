@@ -182,6 +182,41 @@ export async function createSubscriptionCheckoutSession(input: {
   });
 }
 
+export async function createBillingPortalSession(input: {
+  workshopId: string;
+  returnPath?: string;
+}) {
+  const subscription = await prisma.subscription.findUnique({
+    where: {
+      workshopId: input.workshopId,
+    },
+  });
+
+  if (!subscription) {
+    throw new Error("Workshop subscription record was not found.");
+  }
+
+  if (!subscription.stripeCustomerId) {
+    throw new Error("Billing portal is not available until a Stripe customer exists.");
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+  if (!appUrl) {
+    throw new Error("NEXT_PUBLIC_APP_URL is not configured.");
+  }
+
+  const returnPath =
+    input.returnPath && input.returnPath.startsWith("/")
+      ? input.returnPath
+      : "/account";
+
+  return getStripe().billingPortal.sessions.create({
+    customer: subscription.stripeCustomerId,
+    return_url: `${appUrl}${returnPath}`,
+  });
+}
+
 export async function finalizeCheckoutSession(sessionId: string) {
   const session = await getStripe().checkout.sessions.retrieve(sessionId);
 
