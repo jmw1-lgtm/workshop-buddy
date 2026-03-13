@@ -1,4 +1,4 @@
-import { IN_APP_BILLING_PATH } from "@/lib/paths";
+import { IN_APP_ACCOUNT_PATH } from "@/lib/paths";
 
 export const appNavigation = [
   {
@@ -20,8 +20,8 @@ export const appNavigation = [
     description: "Search people and vehicles",
   },
   {
-    href: IN_APP_BILLING_PATH,
-    label: "Billing",
+    href: IN_APP_ACCOUNT_PATH,
+    label: "Account",
     icon: "credit_card",
     description: "Plans and subscription",
   },

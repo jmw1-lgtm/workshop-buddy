@@ -2,9 +2,7 @@ import { CustomerDetailDialog } from "@/components/customers/customer-detail-dia
 import { CustomerList } from "@/components/customers/customer-list";
 import { CustomerSearchForm } from "@/components/customers/customer-search-form";
 import { AppPage } from "@/components/layout/app-page";
-import { PageHeader } from "@/components/layout/page-header";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { requireCurrentWorkshop } from "@/lib/workshop";
 import { getCustomersPageData } from "@/services/customers";
 
@@ -29,25 +27,15 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
 
   return (
     <AppPage>
-      <PageHeader
-        eyebrow="Customers"
-        title="Customer search"
-        description="Search customers in the current workshop by name, phone, or vehicle registration."
-        actions={<Badge variant="success">{data.customers.length} loaded</Badge>}
-      />
-
       <section className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Search</CardTitle>
-            <CardDescription>
-              Results are scoped to {tenant.workshopName} only.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div className="flex flex-col gap-3 rounded-[1.75rem] border border-[var(--surface-border)] bg-white p-3 shadow-[0_10px_24px_rgba(15,23,42,0.04)] sm:flex-row sm:items-center">
+          <div className="min-w-0 flex-1">
             <CustomerSearchForm defaultValue={data.query} />
-          </CardContent>
-        </Card>
+          </div>
+          <Button type="button" variant="outline" disabled>
+            New customer
+          </Button>
+        </div>
 
         <CustomerList
           customers={data.customers}

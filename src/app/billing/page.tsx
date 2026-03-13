@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { BillingContent } from "@/components/billing/billing-content";
 import { formatDisplayDate } from "@/lib/dates";
-import { IN_APP_BILLING_PATH } from "@/lib/paths";
+import { IN_APP_ACCOUNT_PATH } from "@/lib/paths";
 import { getCurrentMembership } from "@/lib/workshop";
 import {
   getStripeSubscriptionSummary,
@@ -31,7 +31,7 @@ function buildInAppBillingRedirect(params?: { checkout?: string; error?: string 
 
   const query = search.toString();
 
-  return query ? `${IN_APP_BILLING_PATH}?${query}` : IN_APP_BILLING_PATH;
+  return query ? `${IN_APP_ACCOUNT_PATH}?${query}` : IN_APP_ACCOUNT_PATH;
 }
 
 export default async function StandaloneBillingPage({

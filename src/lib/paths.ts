@@ -1,1 +1,1 @@
-export const IN_APP_BILLING_PATH = "/workspace/billing";
+export const IN_APP_ACCOUNT_PATH = "/account";

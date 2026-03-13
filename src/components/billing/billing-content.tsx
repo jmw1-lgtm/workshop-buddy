@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import { startMonthlySubscription, startYearlySubscription } from "@/app/billing/actions";
 import { CancelSignOutButton } from "@/components/auth/cancel-sign-out-button";
+import { PlanOptions } from "@/components/billing/plan-options";
 import { MaterialIcon } from "@/components/layout/material-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -154,37 +154,7 @@ export function BillingContent({
                 </div>
               ) : null}
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <PlanCard
-                  title="Monthly"
-                  price="£49"
-                  supportingText="per workshop / month"
-                  description="Flexible monthly billing for workshops that want to stay nimble."
-                  bullets={[
-                    "Diary and booking management",
-                    "Job cards and customer records",
-                    "Dashboard and workshop visibility",
-                  ]}
-                  action={startMonthlySubscription}
-                  cta="Start monthly subscription"
-                  disabled={status === "ACTIVE"}
-                />
-                <PlanCard
-                  title="Yearly"
-                  price="£490"
-                  supportingText="per workshop / year"
-                  description="Best value for workshops ready to run Workshop Buddy all year."
-                  bullets={[
-                    "Everything in Monthly",
-                    "Lower annual cost",
-                    "Best for established workshops",
-                  ]}
-                  badge="Best value"
-                  action={startYearlySubscription}
-                  cta="Start yearly subscription"
-                  disabled={status === "ACTIVE"}
-                />
-              </div>
+              <PlanOptions disabled={status === "ACTIVE"} />
             </CardContent>
           </Card>
 
@@ -209,71 +179,6 @@ export function BillingContent({
           </Card>
         </div>
       </div>
-    </div>
-  );
-}
-
-function PlanCard({
-  title,
-  price,
-  supportingText,
-  description,
-  bullets,
-  badge,
-  cta,
-  action,
-  disabled,
-}: {
-  title: string;
-  price: string;
-  supportingText: string;
-  description: string;
-  bullets: string[];
-  badge?: string;
-  cta: string;
-  action: () => Promise<void>;
-  disabled: boolean;
-}) {
-  return (
-    <div className="rounded-3xl border border-[var(--surface-border)] bg-white p-5 shadow-[0_12px_32px_rgba(39,76,119,0.06)]">
-      <div className="space-y-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-[var(--foreground)]">{title}</p>
-            <div className="flex items-end gap-2">
-              <p className="text-4xl font-semibold tracking-tight text-[var(--foreground)]">
-                {price}
-              </p>
-              <p className="pb-1 text-sm text-[var(--muted-foreground)]">
-                {supportingText}
-              </p>
-            </div>
-          </div>
-          {badge ? <Badge variant="warning">{badge}</Badge> : null}
-        </div>
-
-        <p className="text-sm leading-6 text-[var(--muted-foreground)]">
-          {description}
-        </p>
-
-        <ul className="space-y-2 text-sm text-[var(--foreground)]">
-          {bullets.map((bullet) => (
-            <li key={bullet} className="flex items-start gap-2">
-              <MaterialIcon
-                name="check_circle"
-                className="mt-0.5 text-[18px] text-[var(--primary)]"
-              />
-              <span>{bullet}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <form action={action} className="mt-5">
-        <Button className="w-full" disabled={disabled}>
-          {disabled ? "Current subscription active" : cta}
-        </Button>
-      </form>
     </div>
   );
 }

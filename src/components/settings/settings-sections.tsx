@@ -10,8 +10,6 @@ import {
   updateWorkshopProfile,
 } from "@/app/(app)/settings/actions";
 import { AppPage } from "@/components/layout/app-page";
-import { PageHeader } from "@/components/layout/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -83,13 +81,6 @@ export function SettingsSections({
 
   return (
     <AppPage>
-      <PageHeader
-        eyebrow="Settings"
-        title="Workshop settings"
-        description="Manage workshop profile, diary configuration, and job type colours for the current workshop."
-        actions={<Badge variant="success">Tenant-scoped</Badge>}
-      />
-
       <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
         <Card>
           <CardHeader>
