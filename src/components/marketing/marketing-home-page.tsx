@@ -320,29 +320,35 @@ export function MarketingHomePage() {
               <p className="pl-1 text-sm font-medium text-[var(--muted-foreground)]/90">
                 No credit card required
               </p>
-              <div className="flex flex-wrap gap-3 pt-1" aria-label="Workshop positioning badges">
-                {[
-                  { label: "Built for independent garages", icon: "garage_home" },
-                  { label: "1-10 staff workshops", icon: "groups" },
-                  { label: "Reception-first workflow", icon: "support_agent" },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center gap-2.5 rounded-full border border-[var(--primary-pale)]/65 bg-[rgba(231,236,239,0.82)] px-4 py-2.5 text-sm font-semibold text-[var(--primary)] shadow-[0_12px_24px_rgba(39,76,119,0.06)]"
-                  >
-                    <div className="flex size-7 items-center justify-center rounded-full bg-[rgba(163,206,241,0.32)] text-[var(--primary)]">
-                      <MaterialIcon name={item.icon} className="text-[16px]" />
-                    </div>
-                    <span>{item.label}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           </header>
 
           <div className="relative z-10">
             <HeroVisual />
           </div>
+        </div>
+      </section>
+
+      <section className="border-y border-[var(--primary-pale)]/70 bg-[var(--background)]/66">
+        <div className="mx-auto grid max-w-7xl gap-4 px-6 py-6 md:grid-cols-2 xl:grid-cols-3">
+          {[
+            { label: "Built for independent garages", icon: "garage_home" },
+            { label: "1-10 staff workshops", icon: "groups" },
+            { label: "Reception-first workflow", icon: "support_agent" },
+            { label: "Manage bookings", icon: "calendar_month" },
+            { label: "Track job cards", icon: "description" },
+            { label: "See technician availability", icon: "engineering" },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="flex items-center gap-3 rounded-[1.6rem] bg-[rgba(163,206,241,0.24)] px-6 py-4 text-sm font-semibold text-[var(--primary)]"
+            >
+              <div className="flex size-9 items-center justify-center rounded-full bg-[rgba(163,206,241,0.42)] text-[var(--primary)]">
+                <MaterialIcon name={item.icon} className="text-[18px]" />
+              </div>
+              <span>{item.label}</span>
+            </div>
+          ))}
         </div>
       </section>
 
