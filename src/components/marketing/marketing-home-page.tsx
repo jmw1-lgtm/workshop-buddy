@@ -84,21 +84,24 @@ const pricingPlans = [
     price: "£49",
     cadence: "per workshop / month",
     points: [
-      "Diary, dashboard, and job cards",
-      "Customer and vehicle records",
-      "Free trial before billing",
+      "Workshop diary and bookings",
+      "Customer and vehicle history",
+      "Job cards and printable worksheets",
     ],
+    reassurance: "Cancel anytime.",
     featured: false,
   },
   {
     name: "Yearly",
     price: "£490",
     cadence: "per workshop / year",
+    priceNote: "£41/month billed yearly",
     points: [
       "Everything in Monthly",
-      "Best-value annual billing",
-      "Free trial before activation",
+      "Save two months with annual billing",
+      "Free trial before billing",
     ],
+    reassurance: "Cancel anytime.",
     featured: true,
   },
 ];
@@ -453,8 +456,8 @@ export function MarketingHomePage() {
       <section id="pricing" className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
         <SectionIntro
           eyebrow="Pricing"
-          title="Simple plans with a free trial before billing."
-          description="Choose a monthly or yearly plan, then wire Stripe later without changing the layout."
+          title="Simple pricing for independent garages"
+          description="Start with a free trial. Choose monthly or yearly when you're ready."
         />
 
         <div className="mt-10 grid gap-5 lg:grid-cols-2">
@@ -483,11 +486,16 @@ export function MarketingHomePage() {
                   </p>
                 </div>
                 {plan.featured ? (
-                  <Badge className="bg-[var(--background)] text-[var(--primary)]">Best value</Badge>
+                  <Badge className="bg-[var(--background)] text-[var(--primary)]">Most popular</Badge>
                 ) : null}
               </div>
 
               <div className="mt-6 text-4xl font-semibold tracking-tight">{plan.price}</div>
+              {"priceNote" in plan ? (
+                <p className="mt-2 text-sm" style={{ color: "rgba(231,236,239,0.78)" }}>
+                  {plan.priceNote}
+                </p>
+              ) : null}
 
               <div className="mt-6 space-y-3">
                 {plan.points.map((point) => (
@@ -524,6 +532,14 @@ export function MarketingHomePage() {
                 >
                   <Link href="/sign-up">Start free trial</Link>
                 </Button>
+                <p
+                  className="mt-3 text-sm"
+                  style={{
+                    color: plan.featured ? "rgba(231,236,239,0.78)" : "var(--muted-foreground)",
+                  }}
+                >
+                  {plan.reassurance}
+                </p>
               </div>
             </div>
           ))}

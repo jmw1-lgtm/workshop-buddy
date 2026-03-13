@@ -1,4 +1,4 @@
-import { CustomerDetail } from "@/components/customers/customer-detail";
+import { CustomerDetailDialog } from "@/components/customers/customer-detail-dialog";
 import { CustomerList } from "@/components/customers/customer-list";
 import { CustomerSearchForm } from "@/components/customers/customer-search-form";
 import { AppPage } from "@/components/layout/app-page";
@@ -32,33 +32,31 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
       <PageHeader
         eyebrow="Customers"
         title="Customer search"
-        description="Search customers in the current workshop by name, phone, or vehicle registration. View linked vehicles and recent job history."
+        description="Search customers in the current workshop by name, phone, or vehicle registration."
         actions={<Badge variant="success">{data.customers.length} loaded</Badge>}
       />
 
-      <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Search</CardTitle>
-              <CardDescription>
-                Results are scoped to {tenant.workshopName} only.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CustomerSearchForm defaultValue={data.query} />
-            </CardContent>
-          </Card>
+      <section className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Search</CardTitle>
+            <CardDescription>
+              Results are scoped to {tenant.workshopName} only.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CustomerSearchForm defaultValue={data.query} />
+          </CardContent>
+        </Card>
 
-          <CustomerList
-            customers={data.customers}
-            selectedCustomerId={data.selectedCustomer?.id}
-            query={data.query}
-          />
-        </div>
-
-        <CustomerDetail customer={data.selectedCustomer} />
+        <CustomerList
+          customers={data.customers}
+          selectedCustomerId={data.selectedCustomer?.id}
+          query={data.query}
+        />
       </section>
+
+      <CustomerDetailDialog customer={data.selectedCustomer} />
     </AppPage>
   );
 }

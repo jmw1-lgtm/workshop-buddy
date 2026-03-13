@@ -64,7 +64,7 @@ export async function getCustomersPageData({
   const selectedCustomerId =
     customerId && customers.some((customer) => customer.id === customerId)
       ? customerId
-      : customers[0]?.id;
+      : undefined;
 
   const selectedCustomer = selectedCustomerId
     ? await prisma.customer.findFirst({
