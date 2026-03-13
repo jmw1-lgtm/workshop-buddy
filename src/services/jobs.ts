@@ -28,6 +28,7 @@ export async function getJobCardData(input: {
         select: {
           name: true,
           phone: true,
+          email: true,
         },
       },
       vehicle: {

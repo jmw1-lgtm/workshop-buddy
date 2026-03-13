@@ -38,7 +38,8 @@ export async function resolveCustomerAndVehicle(
     workshopId: string;
     registration: string;
     customerName: string;
-    phone: string;
+    phone?: string;
+    email?: string;
     make?: string;
     model?: string;
     fuel?: string;
@@ -63,7 +64,8 @@ export async function resolveCustomerAndVehicle(
       },
       data: {
         name: input.customerName,
-        phone: input.phone,
+        phone: input.phone || null,
+        email: input.email || existingVehicle.customer.email,
       },
     });
 
@@ -93,7 +95,8 @@ export async function resolveCustomerAndVehicle(
     data: {
       workshopId: input.workshopId,
       name: input.customerName,
-      phone: input.phone,
+      phone: input.phone || null,
+      email: input.email || null,
     },
   });
 

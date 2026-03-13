@@ -25,6 +25,7 @@ type DiaryGridProps = {
     id: string;
     customerName: string;
     customerPhone: string | null;
+    customerEmail: string | null;
     vehicleRegistration: string;
     jobTypeId: string;
     jobTypeName: string;

@@ -18,6 +18,7 @@ type CustomerDetailDialogProps = {
     id: string;
     name: string;
     phone: string | null;
+    email: string | null;
     vehicles: Array<{
       id: string;
       registration: string;
@@ -71,11 +72,31 @@ export function CustomerDetailDialog({
             <DialogHeader>
               <DialogTitle>{customer.name}</DialogTitle>
               <DialogDescription>
-                {customer.phone || "No phone number saved"}
+                {[customer.phone, customer.email].filter(Boolean).join(" · ") ||
+                  "No contact details saved"}
               </DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-6">
+              <section className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-muted)] px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted-foreground)]">
+                    Phone
+                  </p>
+                  <p className="mt-1 text-sm text-[var(--foreground)]">
+                    {customer.phone || "Not recorded"}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-muted)] px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted-foreground)]">
+                    Email
+                  </p>
+                  <p className="mt-1 text-sm text-[var(--foreground)]">
+                    {customer.email || "Not recorded"}
+                  </p>
+                </div>
+              </section>
+
               <section className="space-y-3">
                 <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--muted-foreground)]">
                   Vehicles

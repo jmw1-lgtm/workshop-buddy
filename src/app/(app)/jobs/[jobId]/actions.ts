@@ -27,6 +27,7 @@ export async function updateJobCard(
   const registration = formData.get("registration")?.toString().trim().toUpperCase() ?? "";
   const customerName = formData.get("customerName")?.toString().trim() ?? "";
   const phone = formData.get("phone")?.toString().trim() ?? "";
+  const customerEmail = formData.get("customerEmail")?.toString().trim() ?? "";
   const make = formData.get("make")?.toString().trim() ?? "";
   const model = formData.get("model")?.toString().trim() ?? "";
   const fuel = formData.get("fuel")?.toString().trim() ?? "";
@@ -52,6 +53,10 @@ export async function updateJobCard(
       error:
         "Scheduled date, time, registration, customer, phone, and job type are required.",
     };
+  }
+
+  if (customerEmail && !isValidEmail(customerEmail)) {
+    return { error: "Customer email is invalid." };
   }
 
   if (!JOB_STATUSES.has(status)) {
@@ -90,6 +95,7 @@ export async function updateJobCard(
         registration,
         customerName,
         phone,
+        email: customerEmail,
         make,
         model,
         fuel,
@@ -133,4 +139,8 @@ function parseOptionalInt(value: FormDataEntryValue | null) {
   const parsed = Number(raw);
 
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }

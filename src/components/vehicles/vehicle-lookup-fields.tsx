@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { MaterialIcon } from "@/components/layout/material-icon";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ type VehicleLookupFieldsProps = {
     year?: number | null;
     engineSizeCc?: number | null;
   };
+  allowManualEntry?: boolean;
+  onVehicleChange?: (vehicle: VehicleFormState) => void;
 };
 
 type VehicleFormState = {
@@ -41,7 +43,37 @@ function toFormState(
   };
 }
 
-export function VehicleLookupFields({ initialVehicle }: VehicleLookupFieldsProps) {
+export function VehicleLookupFields({
+  initialVehicle,
+  allowManualEntry = true,
+  onVehicleChange,
+}: VehicleLookupFieldsProps) {
+  const initialRegistration = initialVehicle?.registration ?? null;
+  const initialMake = initialVehicle?.make ?? null;
+  const initialModel = initialVehicle?.model ?? null;
+  const initialFuel = initialVehicle?.fuel ?? null;
+  const initialYear = initialVehicle?.year ?? null;
+  const initialEngineSizeCc = initialVehicle?.engineSizeCc ?? null;
+
+  const normalizedInitialVehicle = useMemo(
+    () =>
+      toFormState({
+        registration: initialRegistration,
+        make: initialMake,
+        model: initialModel,
+        fuel: initialFuel,
+        year: initialYear,
+        engineSizeCc: initialEngineSizeCc,
+      }),
+    [
+      initialRegistration,
+      initialMake,
+      initialModel,
+      initialFuel,
+      initialYear,
+      initialEngineSizeCc,
+    ],
+  );
   const [vehicle, setVehicle] = useState<VehicleFormState>(() => toFormState(initialVehicle));
   const [status, setStatus] = useState<{
     loading: boolean;
@@ -52,6 +84,30 @@ export function VehicleLookupFields({ initialVehicle }: VehicleLookupFieldsProps
     error: null,
     success: null,
   });
+
+  useEffect(() => {
+    setVehicle((current) =>
+      areVehicleStatesEqual(current, normalizedInitialVehicle)
+        ? current
+        : normalizedInitialVehicle,
+    );
+    setStatus({
+      loading: false,
+      error: null,
+      success: null,
+    });
+  }, [
+    initialMake,
+    initialModel,
+    initialFuel,
+    initialYear,
+    initialEngineSizeCc,
+    normalizedInitialVehicle,
+  ]);
+
+  useEffect(() => {
+    onVehicleChange?.(vehicle);
+  }, [onVehicleChange, vehicle]);
 
   async function runLookup() {
     const registration = normalizeRegistration(vehicle.registration);
@@ -152,43 +208,85 @@ export function VehicleLookupFields({ initialVehicle }: VehicleLookupFieldsProps
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <ReadOnlyField
-          id="make"
-          name="make"
-          label="Make"
-          value={vehicle.make}
-          placeholder="Lookup to populate"
-        />
-        <ReadOnlyField
-          id="model"
-          name="model"
-          label="Model"
-          value={vehicle.model}
-          placeholder="Not returned by DVLA"
-        />
-        <ReadOnlyField
-          id="fuel"
-          name="fuel"
-          label="Fuel type"
-          value={vehicle.fuel}
-          placeholder="Lookup to populate"
-        />
-        <ReadOnlyField
-          id="year"
-          name="year"
-          label="Year"
-          value={vehicle.year}
-          placeholder="Lookup to populate"
-        />
-        <ReadOnlyField
-          id="engineSizeCc"
-          name="engineSizeCc"
-          label="Engine size (cc)"
-          value={vehicle.engineSizeCc}
-          placeholder="Lookup to populate"
-        />
-      </div>
+      {allowManualEntry ? (
+        <div className="grid gap-4 rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-muted)]/35 p-4 sm:grid-cols-2">
+          <EditableField
+            id="make"
+            name="make"
+            label="Make"
+            value={vehicle.make}
+            placeholder="Ford"
+            onChange={(value) =>
+              setVehicle((current) => ({
+                ...current,
+                make: value,
+              }))
+            }
+          />
+          <EditableField
+            id="model"
+            name="model"
+            label="Model"
+            value={vehicle.model}
+            placeholder="Transit Custom"
+            onChange={(value) =>
+              setVehicle((current) => ({
+                ...current,
+                model: value,
+              }))
+            }
+          />
+          <EditableField
+            id="fuel"
+            name="fuel"
+            label="Fuel type"
+            value={vehicle.fuel}
+            placeholder="Diesel"
+            onChange={(value) =>
+              setVehicle((current) => ({
+                ...current,
+                fuel: value,
+              }))
+            }
+          />
+          <EditableField
+            id="year"
+            name="year"
+            label="Year"
+            value={vehicle.year}
+            placeholder="2021"
+            inputMode="numeric"
+            onChange={(value) =>
+              setVehicle((current) => ({
+                ...current,
+                year: value,
+              }))
+            }
+          />
+          <EditableField
+            id="engineSizeCc"
+            name="engineSizeCc"
+            label="Engine size (cc)"
+            value={vehicle.engineSizeCc}
+            placeholder="1996"
+            inputMode="numeric"
+            onChange={(value) =>
+              setVehicle((current) => ({
+                ...current,
+                engineSizeCc: value,
+              }))
+            }
+          />
+        </div>
+      ) : (
+        <>
+          <input type="hidden" name="make" value={vehicle.make} />
+          <input type="hidden" name="model" value={vehicle.model} />
+          <input type="hidden" name="fuel" value={vehicle.fuel} />
+          <input type="hidden" name="year" value={vehicle.year} />
+          <input type="hidden" name="engineSizeCc" value={vehicle.engineSizeCc} />
+        </>
+      )}
 
       {status.error ? (
         <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -205,18 +303,33 @@ export function VehicleLookupFields({ initialVehicle }: VehicleLookupFieldsProps
   );
 }
 
-function ReadOnlyField({
+function areVehicleStatesEqual(left: VehicleFormState, right: VehicleFormState) {
+  return (
+    left.registration === right.registration &&
+    left.make === right.make &&
+    left.model === right.model &&
+    left.fuel === right.fuel &&
+    left.year === right.year &&
+    left.engineSizeCc === right.engineSizeCc
+  );
+}
+
+function EditableField({
   id,
   name,
   label,
   value,
   placeholder,
+  onChange,
+  inputMode,
 }: {
   id: string;
   name: string;
   label: string;
   value: string;
   placeholder: string;
+  onChange: (value: string) => void;
+  inputMode?: React.ComponentProps<"input">["inputMode"];
 }) {
   return (
     <div className="grid gap-2">
@@ -225,9 +338,10 @@ function ReadOnlyField({
         id={id}
         name={name}
         value={value}
-        readOnly
         placeholder={placeholder}
-        className="bg-[var(--surface-muted)]"
+        inputMode={inputMode}
+        onChange={(event) => onChange(event.target.value)}
+        className="bg-white"
       />
     </div>
   );

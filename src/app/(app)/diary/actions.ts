@@ -28,6 +28,7 @@ export async function createDiaryJob(
   const registration = formData.get("registration")?.toString().trim().toUpperCase() ?? "";
   const customerName = formData.get("customerName")?.toString().trim() ?? "";
   const phone = formData.get("phone")?.toString().trim() ?? "";
+  const customerEmail = formData.get("customerEmail")?.toString().trim() ?? "";
   const make = formData.get("make")?.toString().trim() ?? "";
   const model = formData.get("model")?.toString().trim() ?? "";
   const fuel = formData.get("fuel")?.toString().trim() ?? "";
@@ -40,9 +41,15 @@ export async function createDiaryJob(
   const selectedDateParam = formData.get("selectedDate")?.toString() ?? "";
   const selectedView = formData.get("selectedView")?.toString() === "week" ? "week" : "day";
 
-  if (!registration || !customerName || !phone || !jobTypeId || !scheduledStartRaw) {
+  if (!registration || !customerName || !jobTypeId || !scheduledStartRaw) {
     return {
-      error: "Registration, customer, phone, job type, and slot are required.",
+      error: "Registration, customer, job type, and slot are required.",
+    };
+  }
+
+  if (customerEmail && !isValidEmail(customerEmail)) {
+    return {
+      error: "Customer email is invalid.",
     };
   }
 
@@ -68,6 +75,7 @@ export async function createDiaryJob(
         registration,
         customerName,
         phone,
+        email: customerEmail,
         make,
         model,
         fuel,
@@ -116,6 +124,7 @@ export async function updateDiaryJob(
   const registration = formData.get("registration")?.toString().trim().toUpperCase() ?? "";
   const customerName = formData.get("customerName")?.toString().trim() ?? "";
   const phone = formData.get("phone")?.toString().trim() ?? "";
+  const customerEmail = formData.get("customerEmail")?.toString().trim() ?? "";
   const make = formData.get("make")?.toString().trim() ?? "";
   const model = formData.get("model")?.toString().trim() ?? "";
   const fuel = formData.get("fuel")?.toString().trim() ?? "";
@@ -128,9 +137,15 @@ export async function updateDiaryJob(
   const selectedDateParam = formData.get("selectedDate")?.toString() ?? "";
   const selectedView = formData.get("selectedView")?.toString() === "week" ? "week" : "day";
 
-  if (!jobId || !registration || !customerName || !phone || !jobTypeId) {
+  if (!jobId || !registration || !customerName || !jobTypeId) {
     return {
-      error: "Registration, customer, phone, and job type are required.",
+      error: "Registration, customer, and job type are required.",
+    };
+  }
+
+  if (customerEmail && !isValidEmail(customerEmail)) {
+    return {
+      error: "Customer email is invalid.",
     };
   }
 
@@ -169,6 +184,7 @@ export async function updateDiaryJob(
         registration,
         customerName,
         phone,
+        email: customerEmail,
         make,
         model,
         fuel,
@@ -262,4 +278,8 @@ function parseOptionalInt(value: FormDataEntryValue | null) {
   const parsed = Number(raw);
 
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }

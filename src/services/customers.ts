@@ -52,6 +52,7 @@ export async function getCustomersPageData({
       id: true,
       name: true,
       phone: true,
+      email: true,
       _count: {
         select: {
           vehicles: true,
@@ -76,6 +77,7 @@ export async function getCustomersPageData({
           id: true,
           name: true,
           phone: true,
+          email: true,
           vehicles: {
             orderBy: {
               registration: "asc",

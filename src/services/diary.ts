@@ -23,6 +23,7 @@ export type DiaryJob = {
   id: string;
   customerName: string;
   customerPhone: string | null;
+  customerEmail: string | null;
   vehicleRegistration: string;
   jobTypeId: string;
   jobTypeName: string;
@@ -246,6 +247,7 @@ async function getScopedDiaryJobs(input: {
         select: {
           name: true,
           phone: true,
+          email: true,
         },
       },
       vehicle: {
@@ -281,6 +283,7 @@ async function getScopedDiaryJobs(input: {
       id: job.id,
       customerName: job.customer.name,
       customerPhone: job.customer.phone,
+      customerEmail: job.customer.email,
       vehicleRegistration: job.vehicle.registration,
       jobTypeId: job.jobType.id,
       jobTypeName: job.jobType.name,
