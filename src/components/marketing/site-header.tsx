@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import { MaterialIcon } from "@/components/layout/material-icon";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/logo";
 
 export function SiteHeader() {
   const navigation = [
@@ -15,13 +15,11 @@ export function SiteHeader() {
     <header className="sticky top-0 z-30 border-b border-[var(--primary-pale)]/60 bg-[var(--topbar-background)]/95 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-[var(--primary)] text-[var(--background)] shadow-[0_14px_24px_rgba(39,76,119,0.18)]">
-            <MaterialIcon name="precision_manufacturing" className="text-[20px]" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-[var(--foreground)]">Workshop Buddy</p>
-            <p className="text-xs text-[var(--muted-foreground)]">Built for independent workshops</p>
-          </div>
+          <Logo
+            size={28}
+            imageClassName="size-7"
+            textClassName="text-sm text-[var(--foreground)]"
+          />
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex">

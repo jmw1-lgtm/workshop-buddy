@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { MaterialIcon } from "@/components/layout/material-icon";
+import { Logo } from "@/components/ui/logo";
 import { appNavigation } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
@@ -12,18 +13,16 @@ export function AppSidebar() {
 
   return (
     <aside className="flex h-full w-full flex-col overflow-y-auto bg-[var(--sidebar-background)] px-4 py-5 text-[var(--sidebar-foreground)]">
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-        <div className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--sidebar-accent)] text-[var(--sidebar-accent-foreground)]">
-            <MaterialIcon name="directions_car" className="text-[22px]" />
-          </div>
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--sidebar-foreground)]">
-            Workshop Buddy
-          </p>
-        </div>
+      <div className="flex flex-col items-center gap-3 px-2 py-3">
+        <Logo
+          size={80}
+          className="flex-col gap-2 text-center"
+          imageClassName="size-20"
+          textClassName="text-base font-medium normal-case tracking-normal text-[var(--sidebar-foreground)]"
+        />
       </div>
 
-      <nav className="mt-6 flex flex-1 flex-col gap-2">
+      <nav className="mt-8 flex flex-1 flex-col gap-2">
         {appNavigation.map((item) => {
           const isActive = pathname === item.href;
 

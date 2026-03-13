@@ -80,7 +80,7 @@ export function WeekDiaryGrid({
   return (
     <>
       <div className="overflow-x-auto">
-        <div className="min-w-[1120px] overflow-hidden bg-white">
+        <div className="min-w-[1120px] overflow-hidden rounded-[2rem] border border-[var(--surface-border)] bg-white shadow-[0_14px_32px_rgba(15,23,42,0.04)]">
           <div className="grid grid-cols-[88px_repeat(7,minmax(148px,1fr))] border-b border-[color:rgba(214,222,232,0.75)] bg-[var(--surface-muted)]/60">
             <div className="border-r border-[color:rgba(214,222,232,0.75)] px-3 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
               Time
@@ -95,8 +95,12 @@ export function WeekDiaryGrid({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-[var(--foreground)]">{day.shortLabel}</p>
-                    <p className="mt-1 text-sm text-[var(--muted-foreground)]">{day.label}</p>
+                    <p className="text-sm font-semibold leading-none text-[var(--foreground)]">
+                      {day.shortLabel}
+                    </p>
+                    <p className="mt-2 text-sm font-medium leading-none text-[var(--muted-foreground)]">
+                      {day.label}
+                    </p>
                   </div>
                   {day.isToday ? (
                     <span className="rounded-full bg-[var(--primary)]/10 px-2.5 py-1 text-[11px] font-semibold text-[var(--primary)]">

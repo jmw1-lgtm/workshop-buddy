@@ -50,28 +50,27 @@ export function NextAvailableSlots({
                   setSelectedSlot(slot);
                 }}
                 className={cn(
-                  "rounded-3xl border border-[var(--surface-border)] bg-white/80 p-4 text-left transition-colors hover:border-[var(--primary)]/30 hover:bg-white hover:shadow-[0_14px_28px_rgba(15,23,42,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                  "group rounded-3xl border border-[var(--surface-border)] bg-white/80 p-4 text-left transition-colors hover:border-[var(--primary)]/35 hover:bg-white hover:shadow-[0_14px_28px_rgba(15,23,42,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-white",
                 )}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[2rem] leading-none font-semibold tracking-tight text-[var(--foreground)]">
+                    <p className="text-[2.35rem] leading-none font-semibold tracking-tight text-[var(--foreground)]">
                       {formatTimeLabel(startsAt)}
                     </p>
-                    <p className="mt-2 text-sm font-medium text-[var(--foreground)]">
-                      {formatShortDisplayDate(startsAt)}
-                    </p>
-                    <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                      Ends {formatTimeLabel(endsAt)}
+                    <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+                      {formatShortDisplayDate(startsAt)} · until {formatTimeLabel(endsAt)}
                     </p>
                   </div>
                   <div className="flex size-10 items-center justify-center rounded-2xl bg-[var(--surface-muted)] text-[var(--primary)]">
                     <MaterialIcon name="add_task" className="text-[20px]" />
                   </div>
                 </div>
-                <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-[var(--primary)]">
-                  <MaterialIcon name="add" className="text-[18px]" />
-                  Create booking
+                <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-[var(--primary)]">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-muted)] px-3 py-1.5 transition-colors group-hover:bg-[var(--primary)]/10">
+                    <MaterialIcon name="add" className="text-[18px]" />
+                    Create booking
+                  </span>
                 </div>
               </button>
             );

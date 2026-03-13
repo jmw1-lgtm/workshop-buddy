@@ -47,11 +47,15 @@ export function getTrialBadgeLabel(daysRemaining: number) {
 }
 
 export function getTrialBadgeVariant(daysRemaining: number) {
+  if (daysRemaining <= 1) {
+    return "danger" as const;
+  }
+
   if (daysRemaining <= 5) {
     return "warning" as const;
   }
 
-  return "default" as const;
+  return "info" as const;
 }
 
 export async function getWorkshopSubscription(workshopId: string) {

@@ -8,14 +8,14 @@ type AppHeaderProps = {
   workshopName: string;
   emailAddress: string | null;
   trialBadgeLabel?: string | null;
-  trialBadgeVariant?: "default" | "warning";
+  trialBadgeVariant?: "info" | "warning" | "danger";
 };
 
 export function AppHeader({
   workshopName,
   emailAddress,
   trialBadgeLabel,
-  trialBadgeVariant = "default",
+  trialBadgeVariant = "info",
 }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-30 flex h-20 w-full min-w-0 shrink-0 items-center justify-between border-b border-[var(--surface-border)] bg-[var(--topbar-background)] px-4 backdrop-blur-sm sm:px-6 print:hidden">
@@ -28,7 +28,10 @@ export function AppHeader({
 
       <div className="flex items-center gap-3">
         {trialBadgeLabel ? (
-          <Badge variant={trialBadgeVariant} className="hidden md:inline-flex">
+          <Badge
+            variant={trialBadgeVariant}
+            className="hidden rounded-full px-3.5 py-1.5 text-[11px] font-semibold shadow-sm md:inline-flex"
+          >
             {trialBadgeLabel}
           </Badge>
         ) : null}

@@ -16,6 +16,15 @@ export type DashboardMetrics = {
   inProgress: number;
   waitingParts: number;
   waitingCollection: number;
+  upcomingWorkload: {
+    bookingsNext7Days: number;
+    motBookingsNext7Days: number;
+    serviceRepairBookingsNext7Days: number;
+    busiestUpcomingDay: {
+      label: string;
+      bookings: number;
+    } | null;
+  };
   slotLength: 30 | 60;
   workingDayStartMins: number;
   workingDayEndMins: number;
@@ -32,6 +41,7 @@ export async function getDashboardMetrics(workshopId: string): Promise<Dashboard
   const tomorrowStart = addDays(todayStart, 1);
   const searchEndDay = addDays(todayStart, NEXT_SLOT_SEARCH_DAYS);
   const searchEnd = minutesOnDay(searchEndDay, 24 * 60 - 1);
+  const next7DaysEnd = addDays(todayStart, 7);
 
   const [
     workshop,
@@ -40,6 +50,7 @@ export async function getDashboardMetrics(workshopId: string): Promise<Dashboard
     waitingParts,
     waitingCollection,
     upcomingJobs,
+    upcomingPlanningJobs,
   ] = await prisma.$transaction([
     prisma.workshop.findUniqueOrThrow({
       where: { id: workshopId },
@@ -95,6 +106,29 @@ export async function getDashboardMetrics(workshopId: string): Promise<Dashboard
         durationMins: true,
       },
     }),
+    prisma.job.findMany({
+      where: {
+        workshopId,
+        status: {
+          not: JobStatus.CANCELLED,
+        },
+        scheduledStart: {
+          gte: todayStart,
+          lt: next7DaysEnd,
+        },
+      },
+      orderBy: {
+        scheduledStart: "asc",
+      },
+      select: {
+        scheduledStart: true,
+        jobType: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    }),
   ]);
 
   const slotLength = workshop.slotLength === 30 ? 30 : 60;
@@ -110,16 +144,68 @@ export async function getDashboardMetrics(workshopId: string): Promise<Dashboard
           jobs: upcomingJobs,
         })
       : [];
+  const upcomingWorkload = summarizeUpcomingWorkload(upcomingPlanningJobs);
 
   return {
     jobsToday,
     inProgress,
     waitingParts,
     waitingCollection,
+    upcomingWorkload,
     slotLength,
     workingDayStartMins,
     workingDayEndMins,
     nextAvailableSlots,
+  };
+}
+
+function summarizeUpcomingWorkload(
+  jobs: Array<{
+    scheduledStart: Date;
+    jobType: {
+      name: string;
+    };
+  }>,
+) {
+  const bookingsNext7Days = jobs.length;
+  const motBookingsNext7Days = jobs.filter(
+    (job) => job.jobType.name.toLowerCase() === "mot",
+  ).length;
+  const serviceRepairBookingsNext7Days = jobs.filter((job) => {
+    const jobTypeName = job.jobType.name.toLowerCase();
+    return jobTypeName === "service" || jobTypeName === "repair";
+  }).length;
+
+  const bookingsByDay = new Map<string, number>();
+
+  for (const job of jobs) {
+    const dateKey = formatDateParam(job.scheduledStart);
+    bookingsByDay.set(dateKey, (bookingsByDay.get(dateKey) ?? 0) + 1);
+  }
+
+  let busiestUpcomingDay: {
+    label: string;
+    bookings: number;
+  } | null = null;
+
+  for (const [dateKey, bookings] of bookingsByDay.entries()) {
+    if (!busiestUpcomingDay || bookings > busiestUpcomingDay.bookings) {
+      busiestUpcomingDay = {
+        label: new Intl.DateTimeFormat("en-GB", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        }).format(new Date(`${dateKey}T00:00:00`)),
+        bookings,
+      };
+    }
+  }
+
+  return {
+    bookingsNext7Days,
+    motBookingsNext7Days,
+    serviceRepairBookingsNext7Days,
+    busiestUpcomingDay,
   };
 }
 

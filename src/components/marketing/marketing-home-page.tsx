@@ -274,57 +274,75 @@ function HeroVisual() {
 export function MarketingHomePage() {
   return (
     <main className="overflow-hidden">
-      <section className="relative">
+      <section className="relative" aria-labelledby="marketing-hero-title">
         <div className="absolute inset-x-0 top-0 h-[560px] bg-[radial-gradient(circle_at_16%_18%,rgba(163,206,241,0.38),transparent_24%),radial-gradient(circle_at_84%_16%,rgba(96,150,186,0.18),transparent_26%)]" />
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 pb-20 pt-14 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:pt-20">
-          <div className="relative z-10 space-y-8">
+        <div className="mx-auto grid max-w-7xl gap-12 px-6 pb-20 pt-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-14 lg:pt-20">
+          <header className="relative z-10 space-y-8">
             <div className="space-y-5">
               <Badge className="bg-[var(--background)]/88 text-[var(--primary)] shadow-sm">
-                A simple workshop control system for independent garages
+                Garage management software for independent workshops
               </Badge>
               <div className="space-y-4">
-                <h1 className="max-w-3xl text-5xl font-semibold tracking-tight text-[var(--foreground)] sm:text-6xl lg:text-[4.6rem]">
-                  Replace the paper diary with a calmer way to run the workshop.
+                <h1
+                  id="marketing-hero-title"
+                  className="max-w-[11ch] text-5xl font-semibold tracking-tight text-[var(--foreground)] sm:text-6xl lg:text-[4.35rem]"
+                >
+                  Replace your workshop diary
                 </h1>
-                <p className="max-w-lg text-lg leading-8 text-[var(--muted-foreground)]">
-                  Workshop Buddy gives reception staff a faster way to manage bookings, job cards, and workshop availability.
+                <p
+                  id="marketing-hero-description"
+                  className="max-w-[31rem] text-base leading-7 text-[var(--muted-foreground)] sm:text-lg sm:leading-8"
+                >
+                  Workshop Buddy helps reception staff manage bookings, job cards and
+                  technician availability in one simple digital diary.
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button size="lg" className="shadow-[0_16px_30px_rgba(39,76,119,0.18)]" asChild>
-                <Link href="/sign-up">Start free trial</Link>
-              </Button>
-              <Button size="lg" variant="outline" className="bg-[var(--background)]/78" asChild>
-                <Link href="#product-preview">See how it works</Link>
-              </Button>
+            <div className="space-y-5" aria-describedby="marketing-hero-description">
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  size="lg"
+                  className="min-w-[13.5rem] shadow-[0_16px_30px_rgba(39,76,119,0.18)]"
+                  asChild
+                >
+                  <Link href="/sign-up">Start free 14-day trial</Link>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-[var(--background)]/78 text-[var(--foreground)]"
+                  asChild
+                >
+                  <Link href="#product-preview">See the diary in action</Link>
+                </Button>
+              </div>
+              <p className="pl-1 text-sm font-medium text-[var(--muted-foreground)]/90">
+                No credit card required
+              </p>
+              <div className="flex flex-wrap gap-3 pt-1" aria-label="Workshop positioning badges">
+                {[
+                  { label: "Built for independent garages", icon: "garage_home" },
+                  { label: "1-10 staff workshops", icon: "groups" },
+                  { label: "Reception-first workflow", icon: "support_agent" },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center gap-2.5 rounded-full border border-[var(--primary-pale)]/65 bg-[rgba(231,236,239,0.82)] px-4 py-2.5 text-sm font-semibold text-[var(--primary)] shadow-[0_12px_24px_rgba(39,76,119,0.06)]"
+                  >
+                    <div className="flex size-7 items-center justify-center rounded-full bg-[rgba(163,206,241,0.32)] text-[var(--primary)]">
+                      <MaterialIcon name={item.icon} className="text-[16px]" />
+                    </div>
+                    <span>{item.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          </header>
 
           <div className="relative z-10">
             <HeroVisual />
           </div>
-        </div>
-      </section>
-
-      <section className="border-y border-[var(--primary-pale)]/70 bg-[var(--background)]/66">
-        <div className="mx-auto grid max-w-7xl gap-4 px-6 py-6 md:grid-cols-3">
-          {[
-            { label: "Built for independent garages", icon: "garage_home" },
-            { label: "1-10 staff workshops", icon: "groups" },
-            { label: "Reception-first workflow", icon: "support_agent" },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="flex items-center gap-3 rounded-[1.6rem] bg-[rgba(163,206,241,0.24)] px-6 py-4 text-sm font-semibold text-[var(--primary)]"
-            >
-              <div className="flex size-9 items-center justify-center rounded-full bg-[rgba(163,206,241,0.42)] text-[var(--primary)]">
-                <MaterialIcon name={item.icon} className="text-[18px]" />
-              </div>
-              <span>{item.label}</span>
-            </div>
-          ))}
         </div>
       </section>
 

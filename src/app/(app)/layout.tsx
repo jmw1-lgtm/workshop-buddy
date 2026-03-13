@@ -37,7 +37,7 @@ export default async function AppLayout({
               trialDaysRemaining ? getTrialBadgeLabel(trialDaysRemaining) : null
             }
             trialBadgeVariant={
-              trialDaysRemaining ? getTrialBadgeVariant(trialDaysRemaining) : "default"
+              trialDaysRemaining ? getTrialBadgeVariant(trialDaysRemaining) : "info"
             }
           />
           <main className="min-h-0 min-w-0 w-full flex-1 overflow-y-auto p-4 sm:p-6 print:overflow-visible print:p-0">

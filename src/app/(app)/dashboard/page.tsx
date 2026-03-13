@@ -27,50 +27,43 @@ export default async function DashboardPage() {
       label: "Jobs today",
       value: metrics.jobsToday,
       icon: "today",
-      helper: "Scheduled across the current day",
     },
     {
       label: "In progress",
       value: metrics.inProgress,
       icon: "build",
-      helper: "Vehicles actively being worked on",
     },
     {
       label: "Waiting parts",
       value: metrics.waitingParts,
       icon: "package_2",
-      helper: "Jobs paused until parts arrive",
     },
     {
       label: "Waiting collection",
       value: metrics.waitingCollection,
       icon: "local_shipping",
-      helper: "Completed work waiting to leave site",
     },
   ];
-
-  const queueSummary = [
+  const upcomingWorkloadRows = [
     {
-      label: "In progress",
-      value: metrics.inProgress,
-      icon: "build",
-      tone: "var(--primary)",
+      label: "Bookings next 7 days",
+      value: metrics.upcomingWorkload.bookingsNext7Days.toString(),
     },
     {
-      label: "Waiting parts",
-      value: metrics.waitingParts,
-      icon: "package_2",
-      tone: "#d97706",
+      label: "MOT bookings next 7 days",
+      value: metrics.upcomingWorkload.motBookingsNext7Days.toString(),
     },
     {
-      label: "Waiting collection",
-      value: metrics.waitingCollection,
-      icon: "local_shipping",
-      tone: "#2563eb",
+      label: "Service / repair next 7 days",
+      value: metrics.upcomingWorkload.serviceRepairBookingsNext7Days.toString(),
+    },
+    {
+      label: "Busiest upcoming day",
+      value: metrics.upcomingWorkload.busiestUpcomingDay
+        ? `${metrics.upcomingWorkload.busiestUpcomingDay.label} · ${metrics.upcomingWorkload.busiestUpcomingDay.bookings}`
+        : "No busiest day yet",
     },
   ];
-
-  const maxQueueValue = Math.max(...queueSummary.map((item) => item.value), 1);
 
   return (
     <AppPage className="gap-4">
@@ -80,26 +73,21 @@ export default async function DashboardPage() {
             key={item.label}
             className="overflow-hidden border-transparent bg-white shadow-[0_16px_40px_rgba(15,23,42,0.05)]"
           >
-            <CardHeader className="gap-4 pb-3">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <CardDescription className="text-xs font-semibold uppercase tracking-[0.18em]">
-                    {item.label}
-                  </CardDescription>
-                  <CardTitle className="mt-3 text-[2.6rem] font-semibold tracking-tight">
-                    {item.value}
-                  </CardTitle>
-                </div>
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--surface-muted)] shadow-inner shadow-white/70">
-                  <MaterialIcon
-                    name={item.icon}
-                    className="text-[22px] text-[var(--primary)]"
-                  />
-                </div>
+            <CardContent className="flex items-center gap-4 p-6">
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-[var(--surface-muted)] shadow-inner shadow-white/70">
+                <MaterialIcon
+                  name={item.icon}
+                  className="text-[26px] text-[var(--primary)]"
+                />
               </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <p className="text-sm leading-6 text-[var(--muted-foreground)]">{item.helper}</p>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-[var(--muted-foreground)]">
+                  {item.label}
+                </p>
+                <p className="mt-2 text-[2.6rem] font-semibold leading-none tracking-tight text-[var(--foreground)]">
+                  {item.value}
+                </p>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -166,62 +154,25 @@ export default async function DashboardPage() {
         <Card className="border-transparent shadow-[0_16px_40px_rgba(15,23,42,0.05)]">
           <CardHeader className="pb-3">
             <CardDescription className="text-xs font-semibold uppercase tracking-[0.18em]">
-              Status summary
+              Planning snapshot
             </CardDescription>
-            <CardTitle className="text-2xl">Today&apos;s queue</CardTitle>
+            <CardTitle className="text-2xl">Upcoming workload</CardTitle>
           </CardHeader>
 
           <CardContent className="space-y-3">
-            <div className="space-y-3">
-              {queueSummary.map((item) => {
-                const width =
-                  item.value > 0
-                    ? Math.max(12, Math.round((item.value / maxQueueValue) * 100))
-                    : 0;
-
-                return (
-                  <div
-                    key={item.label}
-                    className="rounded-3xl border border-[var(--surface-border)] bg-white p-4"
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="flex size-11 items-center justify-center rounded-2xl"
-                          style={{
-                            backgroundColor: `${item.tone}14`,
-                            color: item.tone,
-                          }}
-                        >
-                          <MaterialIcon name={item.icon} className="text-[20px]" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-[var(--foreground)]">
-                            {item.label}
-                          </p>
-                          <p className="text-xs text-[var(--muted-foreground)]">
-                            {item.value === 1 ? "1 job" : `${item.value} jobs`}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-xl font-semibold text-[var(--foreground)]">
-                        {item.value}
-                      </span>
-                    </div>
-
-                    <div className="mt-3 h-2 rounded-full bg-[var(--surface-muted)]">
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{
-                          width: `${width}%`,
-                          backgroundColor: item.tone,
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            {upcomingWorkloadRows.map((item) => (
+              <div
+                key={item.label}
+                className="flex items-center justify-between gap-4 rounded-3xl border border-[var(--surface-border)] bg-white p-4"
+              >
+                <p className="text-sm font-semibold text-[var(--foreground)]">
+                  {item.label}
+                </p>
+                <p className="text-sm font-semibold text-[var(--muted-foreground)] text-right">
+                  {item.value}
+                </p>
+              </div>
+            ))}
           </CardContent>
         </Card>
       </section>

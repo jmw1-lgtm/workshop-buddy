@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CreateJobDialog } from "@/components/diary/create-job-dialog";
 import { DiaryJobCard } from "@/components/diary/diary-job-card";
 import { useDiaryReschedule } from "@/components/diary/use-diary-reschedule";
+import { MaterialIcon } from "@/components/layout/material-icon";
 import { cn } from "@/lib/utils";
 
 type DiaryGridProps = {
@@ -271,6 +272,13 @@ export function DiaryGrid({
               </div>
             </div>
           ) : null}
+        </div>
+        <div className="border-t border-[var(--surface-border)] bg-[var(--surface-muted)]/60 px-4 py-3 text-sm text-[var(--muted-foreground)]">
+          <div className="flex items-center gap-2">
+            <MaterialIcon name="info" className="text-[18px]" />
+            Drag jobs to reschedule them. Clicking still opens the job card. Empty
+            slots create a new job for that day and time.
+          </div>
         </div>
         {reschedule.error ? (
           <div className="border-t border-[var(--surface-border)] bg-rose-50 px-4 py-3 text-sm text-rose-700">
