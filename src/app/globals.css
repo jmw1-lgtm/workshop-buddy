@@ -3,21 +3,24 @@
 @import "material-symbols/rounded.css";
 
 :root {
-  --background: #f3f5f8;
-  --foreground: #12202f;
-  --muted-foreground: #58677a;
-  --card: #ffffff;
-  --surface-muted: #e9edf2;
-  --surface-border: #d6dee8;
-  --topbar-background: rgba(255, 255, 255, 0.9);
-  --primary: #0f766e;
-  --primary-strong: #115e59;
-  --ring: #0f766e;
-  --sidebar-background: #102033;
-  --sidebar-foreground: #eef4fb;
-  --sidebar-muted: #91a1b7;
-  --sidebar-accent: #d7f266;
-  --sidebar-accent-foreground: #182437;
+  --background: #e7ecef;
+  --foreground: #274c77;
+  --muted-foreground: #8b8c89;
+  --card: #e7ecef;
+  --surface-muted: #e7ecef;
+  --surface-border: #a3cef1;
+  --topbar-background: rgba(231, 236, 239, 0.92);
+  --primary: #274c77;
+  --primary-strong: #274c77;
+  --primary-soft: #6096ba;
+  --primary-pale: #a3cef1;
+  --neutral-tone: #8b8c89;
+  --ring: #274c77;
+  --sidebar-background: #274c77;
+  --sidebar-foreground: #e7ecef;
+  --sidebar-muted: #a3cef1;
+  --sidebar-accent: #a3cef1;
+  --sidebar-accent-foreground: #274c77;
 }
 
 @theme inline {
@@ -35,7 +38,9 @@ html {
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at top left, rgba(163, 206, 241, 0.28), transparent 28%),
+    linear-gradient(180deg, rgba(231, 236, 239, 0.92) 0%, var(--background) 100%);
   color: var(--foreground);
   font-family: "Raleway", sans-serif;
 }
@@ -51,4 +56,19 @@ button {
     "wght" 500,
     "GRAD" 0,
     "opsz" 24;
+}
+
+@media print {
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    background: #e7ecef;
+  }
+
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
 }

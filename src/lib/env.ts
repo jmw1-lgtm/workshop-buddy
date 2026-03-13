@@ -3,6 +3,7 @@ const requiredEnvVars = [
   "CLERK_SECRET_KEY",
   "DATABASE_URL",
   "DIRECT_URL",
+  "NEXT_PUBLIC_APP_URL",
 ] as const;
 
 export function validateServerEnv() {

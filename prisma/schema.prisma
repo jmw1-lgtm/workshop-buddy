@@ -18,40 +18,64 @@ enum JobStatus {
   CANCELLED
 }
 
+enum MembershipRole {
+  OWNER
+  ADMIN
+  STAFF
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+}
+
 model Workshop {
-  id                   String         @id @default(cuid())
-  clerkOrgId           String?        @unique
+  id                   String       @id @default(cuid())
   name                 String
-  slug                 String         @unique
-  email                String?
+  slug                 String       @unique
+  address              String?
   phone                String?
-  addressLine1         String?
-  addressLine2         String?
-  town                 String?
-  postcode             String?
-  slotLengthMins       Int            @default(60)
-  stripeCustomerId     String?        @unique
-  stripeSubscriptionId String?        @unique
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
+  email                String?
+  slotLength           Int          @default(60)
+  workingDayStartMins  Int          @default(480)
+  workingDayEndMins    Int          @default(1080)
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
   customers            Customer[]
   vehicles             Vehicle[]
   jobs                 Job[]
   jobTypes             JobType[]
-  memberships          WorkshopUser[]
+  memberships          Membership[]
+  subscription         Subscription?
 }
 
-model WorkshopUser {
-  id          String   @id @default(cuid())
-  workshopId  String
-  clerkUserId String
-  role        String   @default("owner")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  workshop    Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+model Subscription {
+  id                   String             @id @default(cuid())
+  workshopId           String             @unique
+  status               SubscriptionStatus @default(TRIAL)
+  trialEndsAt          DateTime
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  workshop             Workshop           @relation(fields: [workshopId], references: [id], onDelete: Cascade)
 
-  @@unique([workshopId, clerkUserId])
+  @@index([status])
+}
+
+model Membership {
+  id          String         @id @default(cuid())
+  clerkUserId String         @unique
+  workshopId  String
+  role        MembershipRole @default(OWNER)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  workshop    Workshop       @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+
   @@index([clerkUserId])
+  @@index([workshopId])
 }
 
 model Customer {
@@ -78,6 +102,7 @@ model Vehicle {
   model        String?
   fuel         String?
   engine       String?
+  engineSizeCc Int?
   year         Int?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -93,7 +118,7 @@ model JobType {
   id         String    @id @default(cuid())
   workshopId String
   name       String
-  colour     String
+  color      String
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   workshop   Workshop  @relation(fields: [workshopId], references: [id], onDelete: Cascade)

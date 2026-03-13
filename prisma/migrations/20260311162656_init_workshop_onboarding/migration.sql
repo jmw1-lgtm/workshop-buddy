@@ -1,19 +1,18 @@
 -- CreateEnum
 CREATE TYPE "JobStatus" AS ENUM ('BOOKED', 'ARRIVED', 'IN_PROGRESS', 'WAITING_PARTS', 'WAITING_COLLECTION', 'COMPLETED', 'CANCELLED');
 
+-- CreateEnum
+CREATE TYPE "MembershipRole" AS ENUM ('OWNER', 'ADMIN', 'STAFF');
+
 -- CreateTable
 CREATE TABLE "Workshop" (
     "id" TEXT NOT NULL,
-    "clerkOrgId" TEXT,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
-    "email" TEXT,
+    "address" TEXT,
     "phone" TEXT,
-    "addressLine1" TEXT,
-    "addressLine2" TEXT,
-    "town" TEXT,
-    "postcode" TEXT,
-    "slotLengthMins" INTEGER NOT NULL DEFAULT 60,
+    "email" TEXT,
+    "slotLength" INTEGER NOT NULL DEFAULT 60,
     "stripeCustomerId" TEXT,
     "stripeSubscriptionId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -23,15 +22,15 @@ CREATE TABLE "Workshop" (
 );
 
 -- CreateTable
-CREATE TABLE "WorkshopUser" (
+CREATE TABLE "Membership" (
     "id" TEXT NOT NULL,
-    "workshopId" TEXT NOT NULL,
     "clerkUserId" TEXT NOT NULL,
-    "role" TEXT NOT NULL DEFAULT 'owner',
+    "workshopId" TEXT NOT NULL,
+    "role" "MembershipRole" NOT NULL DEFAULT 'OWNER',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "WorkshopUser_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Membership_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -69,7 +68,7 @@ CREATE TABLE "JobType" (
     "id" TEXT NOT NULL,
     "workshopId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "colour" TEXT NOT NULL,
+    "color" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -94,9 +93,6 @@ CREATE TABLE "Job" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Workshop_clerkOrgId_key" ON "Workshop"("clerkOrgId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Workshop_slug_key" ON "Workshop"("slug");
 
 -- CreateIndex
@@ -106,10 +102,13 @@ CREATE UNIQUE INDEX "Workshop_stripeCustomerId_key" ON "Workshop"("stripeCustome
 CREATE UNIQUE INDEX "Workshop_stripeSubscriptionId_key" ON "Workshop"("stripeSubscriptionId");
 
 -- CreateIndex
-CREATE INDEX "WorkshopUser_clerkUserId_idx" ON "WorkshopUser"("clerkUserId");
+CREATE UNIQUE INDEX "Membership_clerkUserId_key" ON "Membership"("clerkUserId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "WorkshopUser_workshopId_clerkUserId_key" ON "WorkshopUser"("workshopId", "clerkUserId");
+CREATE INDEX "Membership_clerkUserId_idx" ON "Membership"("clerkUserId");
+
+-- CreateIndex
+CREATE INDEX "Membership_workshopId_idx" ON "Membership"("workshopId");
 
 -- CreateIndex
 CREATE INDEX "Customer_workshopId_name_idx" ON "Customer"("workshopId", "name");
@@ -130,7 +129,7 @@ CREATE INDEX "Job_workshopId_scheduledStart_idx" ON "Job"("workshopId", "schedul
 CREATE INDEX "Job_workshopId_status_idx" ON "Job"("workshopId", "status");
 
 -- AddForeignKey
-ALTER TABLE "WorkshopUser" ADD CONSTRAINT "WorkshopUser_workshopId_fkey" FOREIGN KEY ("workshopId") REFERENCES "Workshop"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Membership" ADD CONSTRAINT "Membership_workshopId_fkey" FOREIGN KEY ("workshopId") REFERENCES "Workshop"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Customer" ADD CONSTRAINT "Customer_workshopId_fkey" FOREIGN KEY ("workshopId") REFERENCES "Workshop"("id") ON DELETE CASCADE ON UPDATE CASCADE;

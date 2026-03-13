@@ -1,3 +1,5 @@
+import { IN_APP_BILLING_PATH } from "@/lib/paths";
+
 export const appNavigation = [
   {
     href: "/dashboard",
@@ -16,6 +18,12 @@ export const appNavigation = [
     label: "Customers",
     icon: "groups",
     description: "Search people and vehicles",
+  },
+  {
+    href: IN_APP_BILLING_PATH,
+    label: "Billing",
+    icon: "credit_card",
+    description: "Plans and subscription",
   },
   {
     href: "/settings",

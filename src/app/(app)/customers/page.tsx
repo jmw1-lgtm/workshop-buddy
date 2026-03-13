@@ -1,19 +1,64 @@
-import { PlaceholderPage } from "@/components/layout/placeholder-page";
+import { CustomerDetail } from "@/components/customers/customer-detail";
+import { CustomerList } from "@/components/customers/customer-list";
+import { CustomerSearchForm } from "@/components/customers/customer-search-form";
+import { AppPage } from "@/components/layout/app-page";
+import { PageHeader } from "@/components/layout/page-header";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { requireCurrentWorkshop } from "@/lib/workshop";
+import { getCustomersPageData } from "@/services/customers";
 
-export default function CustomersPage() {
+type CustomersPageProps = {
+  searchParams?: Promise<{
+    q?: string;
+    customerId?: string;
+  }>;
+};
+
+export default async function CustomersPage({ searchParams }: CustomersPageProps) {
+  const tenant = await requireCurrentWorkshop();
+  const resolvedSearchParams = await searchParams;
+  const query = resolvedSearchParams?.q ?? "";
+  const customerId = resolvedSearchParams?.customerId;
+
+  const data = await getCustomersPageData({
+    workshopId: tenant.workshopId,
+    query,
+    customerId,
+  });
+
   return (
-    <PlaceholderPage
-      eyebrow="Customers"
-      title="Customer and vehicle search"
-      description="This page is reserved for fast receptionist search across customer name, phone, and registration with linked vehicle/job history."
-      primaryMetric="0 customers loaded"
-      metricLabel="Add tenant-scoped search services before introducing richer record views."
-      checklist={[
-        "Search by name",
-        "Search by phone",
-        "Search by registration",
-        "Vehicle history view",
-      ]}
-    />
+    <AppPage>
+      <PageHeader
+        eyebrow="Customers"
+        title="Customer search"
+        description="Search customers in the current workshop by name, phone, or vehicle registration. View linked vehicles and recent job history."
+        actions={<Badge variant="success">{data.customers.length} loaded</Badge>}
+      />
+
+      <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Search</CardTitle>
+              <CardDescription>
+                Results are scoped to {tenant.workshopName} only.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CustomerSearchForm defaultValue={data.query} />
+            </CardContent>
+          </Card>
+
+          <CustomerList
+            customers={data.customers}
+            selectedCustomerId={data.selectedCustomer?.id}
+            query={data.query}
+          />
+        </div>
+
+        <CustomerDetail customer={data.selectedCustomer} />
+      </section>
+    </AppPage>
   );
 }

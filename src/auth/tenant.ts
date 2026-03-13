@@ -1,34 +1,16 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+export {
+  getCurrentMembership,
+  getCurrentWorkshopId,
+  requireCurrentWorkshop as requireTenantContext,
+} from "@/lib/workshop";
 
-export type TenantContext = {
-  clerkUserId: string;
-  emailAddress: string | null;
-  workshopId: string | null;
-  workshopSlug: string | null;
-};
+import { requireCurrentWorkshop } from "@/lib/workshop";
+import { requireWorkshopSubscription } from "@/services/subscriptions";
 
-type SessionClaims = {
-  metadata?: {
-    workshopId?: string;
-    workshopSlug?: string;
-  };
-};
+export async function requireActiveTenantContext() {
+  const tenant = await requireCurrentWorkshop();
 
-export async function requireTenantContext(): Promise<TenantContext> {
-  const { userId, sessionClaims } = await auth();
+  await requireWorkshopSubscription(tenant.workshopId);
 
-  if (!userId) {
-    redirect("/sign-in");
-  }
-
-  const user = await currentUser();
-  const metadata = (sessionClaims as SessionClaims | null)?.metadata;
-
-  return {
-    clerkUserId: userId,
-    emailAddress: user?.primaryEmailAddress?.emailAddress ?? null,
-    workshopId: metadata?.workshopId ?? null,
-    workshopSlug: metadata?.workshopSlug ?? null,
-  };
+  return tenant;
 }

@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 
-import { requireTenantContext } from "@/auth/tenant";
+import { requireCurrentWorkshop } from "@/lib/workshop";
 
 export async function GET() {
-  const tenant = await requireTenantContext();
+  const tenant = await requireCurrentWorkshop();
 
   return NextResponse.json({
     workshopId: tenant.workshopId,
+    workshopName: tenant.workshopName,
     workshopSlug: tenant.workshopSlug,
   });
 }

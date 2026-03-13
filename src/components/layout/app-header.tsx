@@ -1,37 +1,37 @@
 import { UserButton } from "@clerk/nextjs";
 
-import { MaterialIcon } from "@/components/layout/material-icon";
 import { MobileNav } from "@/components/layout/mobile-nav";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 type AppHeaderProps = {
+  workshopName: string;
   emailAddress: string | null;
-  workshopId: string | null;
+  trialBadgeLabel?: string | null;
+  trialBadgeVariant?: "default" | "warning";
 };
 
-export function AppHeader({ emailAddress, workshopId }: AppHeaderProps) {
+export function AppHeader({
+  workshopName,
+  emailAddress,
+  trialBadgeLabel,
+  trialBadgeVariant = "default",
+}: AppHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-[var(--surface-border)] bg-[var(--topbar-background)] px-4 sm:px-6">
+    <header className="sticky top-0 z-30 flex h-20 w-full min-w-0 shrink-0 items-center justify-between border-b border-[var(--surface-border)] bg-[var(--topbar-background)] px-4 backdrop-blur-sm sm:px-6 print:hidden">
       <div className="flex items-center gap-3">
         <MobileNav />
-        <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-            Reception workspace
-          </p>
-          <h1 className="text-xl font-semibold text-[var(--foreground)]">Workshop overview</h1>
-        </div>
+        <p className="truncate text-lg font-semibold text-[var(--foreground)]">
+          {workshopName}
+        </p>
       </div>
 
       <div className="flex items-center gap-3">
-        <Badge variant={workshopId ? "success" : "warning"}>
-          {workshopId ? "Workshop linked" : "Workshop not linked"}
-        </Badge>
-        <Button variant="outline" size="sm" className="hidden sm:inline-flex">
-          <MaterialIcon name="search" className="text-[18px]" />
-          Quick search
-        </Button>
+        {trialBadgeLabel ? (
+          <Badge variant={trialBadgeVariant} className="hidden md:inline-flex">
+            {trialBadgeLabel}
+          </Badge>
+        ) : null}
         <div className="hidden items-center gap-3 rounded-2xl border border-[var(--surface-border)] bg-white px-3 py-2 md:flex">
           <Avatar className="size-9">
             <AvatarFallback>

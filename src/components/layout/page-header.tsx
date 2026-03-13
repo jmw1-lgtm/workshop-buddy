@@ -14,8 +14,8 @@ export function PageHeader({
   actions,
 }: PageHeaderProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-3xl border border-[var(--surface-border)] bg-white p-6 md:flex-row md:items-end md:justify-between">
-      <div className="space-y-2">
+    <div className="flex w-full min-w-0 flex-col gap-4 rounded-3xl border border-[var(--surface-border)] bg-white p-6 md:flex-row md:items-end md:justify-between">
+      <div className="min-w-0 space-y-2">
         <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
           {eyebrow}
         </p>

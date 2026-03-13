@@ -1,4 +1,5 @@
 import { MaterialIcon } from "@/components/layout/material-icon";
+import { AppPage } from "@/components/layout/app-page";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ export function PlaceholderPage({
   checklist,
 }: PlaceholderPageProps) {
   return (
-    <div className="space-y-6">
+    <AppPage>
       <PageHeader
         eyebrow={eyebrow}
         title={title}
@@ -89,6 +90,6 @@ export function PlaceholderPage({
           </CardContent>
         </Card>
       </div>
-    </div>
+    </AppPage>
   );
 }

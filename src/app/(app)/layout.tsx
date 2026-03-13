@@ -1,40 +1,46 @@
 import { ReactNode } from "react";
 
-import { requireTenantContext } from "@/auth/tenant";
+import { requireActiveTenantContext } from "@/auth/tenant";
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
-import { Badge } from "@/components/ui/badge";
+import {
+  getTrialBadgeLabel,
+  getTrialBadgeVariant,
+  getTrialDaysRemaining,
+  getWorkshopSubscription,
+} from "@/services/subscriptions";
 
 export default async function AppLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
-  const tenant = await requireTenantContext();
+  const tenant = await requireActiveTenantContext();
+  const subscription = await getWorkshopSubscription(tenant.workshopId);
+  const trialDaysRemaining =
+    subscription?.status === "TRIAL"
+      ? getTrialDaysRemaining(subscription.trialEndsAt)
+      : null;
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
-        <div className="hidden border-r border-white/10 lg:block">
-          <AppSidebar workshopName={tenant.workshopSlug ?? "New workshop"} />
+    <div className="h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)] print:h-auto print:overflow-visible">
+      <div className="flex h-full min-h-0 w-full print:block print:h-auto">
+        <div className="hidden h-full w-[272px] shrink-0 border-r border-white/10 md:flex print:hidden">
+          <AppSidebar />
         </div>
 
-        <div className="flex min-h-screen flex-col">
+        <div className="flex h-full min-h-0 min-w-0 flex-1 w-full flex-col overflow-hidden print:block print:h-auto print:overflow-visible">
           <AppHeader
+            workshopName={tenant.workshopName}
             emailAddress={tenant.emailAddress}
-            workshopId={tenant.workshopId}
+            trialBadgeLabel={
+              trialDaysRemaining ? getTrialBadgeLabel(trialDaysRemaining) : null
+            }
+            trialBadgeVariant={
+              trialDaysRemaining ? getTrialBadgeVariant(trialDaysRemaining) : "default"
+            }
           />
-          <main className="flex-1 p-4 sm:p-6">
-            {!tenant.workshopId ? (
-              <div className="mb-6 rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4">
-                <div className="flex items-center gap-3">
-                  <Badge variant="warning">Setup pending</Badge>
-                  <p className="text-sm text-amber-900">
-                    No workshop is linked to this Clerk session yet. Keep feature logic tenant-scoped once onboarding is added.
-                  </p>
-                </div>
-              </div>
-            ) : null}
+          <main className="min-h-0 min-w-0 w-full flex-1 overflow-y-auto p-4 sm:p-6 print:overflow-visible print:p-0">
             {children}
           </main>
         </div>

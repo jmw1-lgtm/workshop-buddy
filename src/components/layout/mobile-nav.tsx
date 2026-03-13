@@ -15,7 +15,7 @@ export function MobileNav() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="lg:hidden">
+        <Button variant="outline" size="icon" className="md:hidden">
           <MaterialIcon name="menu" />
           <span className="sr-only">Open navigation</span>
         </Button>
