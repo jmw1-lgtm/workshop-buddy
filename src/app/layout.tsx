@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 
+import { CookieConsentBanner } from "@/components/compliance/cookie-consent-banner";
 import { validateServerEnv } from "@/lib/env";
 
 import "./globals.css";
@@ -23,7 +24,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <ClerkProvider>{children}</ClerkProvider>
+        <ClerkProvider>
+          {children}
+          <CookieConsentBanner />
+        </ClerkProvider>
       </body>
     </html>
   );

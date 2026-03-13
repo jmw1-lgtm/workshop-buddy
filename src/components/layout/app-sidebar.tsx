@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { MaterialIcon } from "@/components/layout/material-icon";
 import { Logo } from "@/components/ui/logo";
 import { appNavigation } from "@/lib/navigation";
+import { businessDetails } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 export function AppSidebar() {
@@ -62,6 +63,23 @@ export function AppSidebar() {
           );
         })}
       </nav>
+
+      <div className="mt-6 border-t border-white/10 px-2 pt-4 text-xs text-[var(--sidebar-muted)]">
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href="/terms" className="transition-colors hover:text-[var(--sidebar-foreground)]">
+            Terms
+          </Link>
+          <Link href="/privacy" className="transition-colors hover:text-[var(--sidebar-foreground)]">
+            Privacy
+          </Link>
+          <a
+            href={`mailto:${businessDetails.contactEmail}`}
+            className="transition-colors hover:text-[var(--sidebar-foreground)]"
+          >
+            Contact
+          </a>
+        </div>
+      </div>
     </aside>
   );
 }

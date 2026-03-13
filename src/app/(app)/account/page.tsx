@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PlanOptions } from "@/components/billing/plan-options";
 import { AppPage } from "@/components/layout/app-page";
 import { formatDisplayDate } from "@/lib/dates";
+import { billingCopy } from "@/lib/site-config";
 import { requireCurrentWorkshop } from "@/lib/workshop";
 import {
   getStripeSubscriptionSummary,
@@ -113,7 +114,15 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               Manage subscription, payment method, and invoice history through Stripe.
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent className="grid gap-4 pt-0">
+            <div className="rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-muted)]/45 px-4 py-3">
+              <ul className="space-y-2 text-sm leading-6 text-[var(--muted-foreground)]">
+                <li>{billingCopy.renewalNotice}</li>
+                <li>{billingCopy.portalNotice}</li>
+                <li>{billingCopy.cancellationNotice}</li>
+                <li>{billingCopy.refundNotice}</li>
+              </ul>
+            </div>
             <Button type="button" variant="outline" disabled>
               Manage billing
             </Button>

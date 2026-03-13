@@ -595,22 +595,6 @@ export function MarketingHomePage() {
           </div>
         </div>
       </section>
-
-      <footer className="border-t border-[var(--primary-pale)]/60 bg-[var(--background)]/88">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-8 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-[var(--foreground)]">Workshop Buddy</p>
-            <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-              A simple workshop control system for independent garages.
-            </p>
-          </div>
-          <div className="flex items-center gap-5 text-sm font-medium text-[var(--muted-foreground)]">
-            <Link href="#features">Features</Link>
-            <Link href="#pricing">Pricing</Link>
-            <Link href="/sign-in">Sign in</Link>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 }
