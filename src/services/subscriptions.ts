@@ -154,7 +154,7 @@ export async function createSubscriptionCheckoutSession(input: {
 
   return stripe.checkout.sessions.create({
     mode: "subscription",
-    success_url: `${appUrl}/billing?checkout=success`,
+    success_url: `${appUrl}/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/billing?checkout=cancelled`,
     line_items: [
       {
@@ -180,6 +180,20 @@ export async function createSubscriptionCheckoutSession(input: {
     allow_promotion_codes: true,
     billing_address_collection: "auto",
   });
+}
+
+export async function finalizeCheckoutSession(sessionId: string) {
+  const session = await getStripe().checkout.sessions.retrieve(sessionId);
+
+  await syncSubscriptionFromCheckoutSession(session);
+
+  if (typeof session.subscription === "string") {
+    const stripeSubscription = await getStripe().subscriptions.retrieve(
+      session.subscription,
+    );
+
+    await syncSubscriptionFromStripeSubscription(stripeSubscription);
+  }
 }
 
 function mapStripeSubscriptionStatus(

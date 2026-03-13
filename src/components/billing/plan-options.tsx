@@ -1,13 +1,17 @@
 import { startMonthlySubscription, startYearlySubscription } from "@/app/billing/actions";
+import { CheckoutSubmitButton } from "@/components/billing/checkout-submit-button";
 import { MaterialIcon } from "@/components/layout/material-icon";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 type PlanOptionsProps = {
   disabled?: boolean;
+  returnPath?: string;
 };
 
-export function PlanOptions({ disabled = false }: PlanOptionsProps) {
+export function PlanOptions({
+  disabled = false,
+  returnPath = "/billing",
+}: PlanOptionsProps) {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <PlanCard
@@ -23,6 +27,7 @@ export function PlanOptions({ disabled = false }: PlanOptionsProps) {
         action={startMonthlySubscription}
         cta="Start monthly subscription"
         disabled={disabled}
+        returnPath={returnPath}
       />
       <PlanCard
         title="Yearly"
@@ -38,6 +43,7 @@ export function PlanOptions({ disabled = false }: PlanOptionsProps) {
         action={startYearlySubscription}
         cta="Start yearly subscription"
         disabled={disabled}
+        returnPath={returnPath}
       />
     </div>
   );
@@ -53,6 +59,7 @@ function PlanCard({
   cta,
   action,
   disabled,
+  returnPath,
 }: {
   title: string;
   price: string;
@@ -61,8 +68,9 @@ function PlanCard({
   bullets: string[];
   badge?: string;
   cta: string;
-  action: () => Promise<void>;
+  action: (formData: FormData) => Promise<void>;
   disabled: boolean;
+  returnPath: string;
 }) {
   return (
     <div className="rounded-3xl border border-[var(--surface-border)] bg-white p-4 shadow-[0_10px_24px_rgba(39,76,119,0.05)]">
@@ -100,9 +108,8 @@ function PlanCard({
       </div>
 
       <form action={action} className="mt-4">
-        <Button className="w-full" disabled={disabled}>
-          {disabled ? "Current subscription active" : cta}
-        </Button>
+        <input type="hidden" name="returnPath" value={returnPath} />
+        <CheckoutSubmitButton cta={cta} disabled={disabled} />
       </form>
     </div>
   );

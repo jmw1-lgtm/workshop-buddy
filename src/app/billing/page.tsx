@@ -5,6 +5,7 @@ import { formatDisplayDate } from "@/lib/dates";
 import { IN_APP_ACCOUNT_PATH } from "@/lib/paths";
 import { getCurrentMembership } from "@/lib/workshop";
 import {
+  finalizeCheckoutSession,
   getStripeSubscriptionSummary,
   getTrialDaysRemaining,
   getWorkshopSubscription,
@@ -15,6 +16,7 @@ type BillingPageProps = {
   searchParams?: Promise<{
     checkout?: string;
     error?: string;
+    session_id?: string;
   }>;
 };
 
@@ -48,6 +50,18 @@ export default async function StandaloneBillingPage({
   }
 
   const params = searchParams ? await searchParams : undefined;
+
+  if (params?.checkout === "success" && params.session_id) {
+    await finalizeCheckoutSession(params.session_id).catch((error) => {
+      console.error("[billing] Failed to finalize Stripe checkout session.", {
+        sessionId: params.session_id,
+        workshopId: membershipResult.membership.workshopId,
+        message:
+          error instanceof Error ? error.message : "Unknown finalization error.",
+      });
+    });
+  }
+
   const subscription = await getWorkshopSubscription(
     membershipResult.membership.workshopId,
   );

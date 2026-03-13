@@ -130,16 +130,20 @@ export function BillingContent({
 
             <CardContent className="space-y-6 py-6">
               {status === "ACTIVE" ? (
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div
+                  className={`grid gap-4 ${nextBillingDate ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
+                >
                   <BillingInfoCard label="Status" value="Active subscription" />
                   <BillingInfoCard
                     label="Plan"
                     value={activePlanLabel ?? "Unknown"}
                   />
-                  <BillingInfoCard
-                    label="Next billing date"
-                    value={nextBillingDate ?? "Unavailable"}
-                  />
+                  {nextBillingDate ? (
+                    <BillingInfoCard
+                      label="Next billing date"
+                      value={nextBillingDate}
+                    />
+                  ) : null}
                 </div>
               ) : null}
 
@@ -154,7 +158,7 @@ export function BillingContent({
                 </div>
               ) : null}
 
-              <PlanOptions disabled={status === "ACTIVE"} />
+              <PlanOptions disabled={status === "ACTIVE"} returnPath="/billing" />
             </CardContent>
           </Card>
 

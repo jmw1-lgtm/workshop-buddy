@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { MaterialIcon } from "@/components/layout/material-icon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlanOptions } from "@/components/billing/plan-options";
 import { AppPage } from "@/components/layout/app-page";
@@ -10,8 +11,16 @@ import {
   getWorkshopSubscription,
 } from "@/services/subscriptions";
 
-export default async function AccountPage() {
+type AccountPageProps = {
+  searchParams?: Promise<{
+    checkout?: string;
+    error?: string;
+  }>;
+};
+
+export default async function AccountPage({ searchParams }: AccountPageProps) {
   const tenant = await requireCurrentWorkshop();
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const subscription = await getWorkshopSubscription(tenant.workshopId);
   const trialDaysRemaining = subscription
     ? getTrialDaysRemaining(subscription.trialEndsAt)
@@ -22,10 +31,29 @@ export default async function AccountPage() {
           () => null,
         )
       : null;
+  const errorMessage = getCheckoutErrorMessage(resolvedSearchParams?.error);
 
   return (
     <AppPage>
       <section className="grid gap-4">
+        {resolvedSearchParams?.checkout === "success" ? (
+          <AccountStatusBanner
+            icon="check_circle"
+            title="Stripe checkout completed"
+            description="Your subscription is active and workshop access remains available."
+            tone="success"
+          />
+        ) : null}
+
+        {errorMessage ? (
+          <AccountStatusBanner
+            icon="error"
+            title="Unable to start checkout"
+            description={errorMessage}
+            tone="error"
+          />
+        ) : null}
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle>Subscription status</CardTitle>
@@ -33,7 +61,9 @@ export default async function AccountPage() {
               Manage the subscription for {tenant.workshopName}.
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3 pt-0 sm:grid-cols-3">
+          <CardContent
+            className={`grid gap-3 pt-0 ${stripeSubscriptionSummary?.nextBillingDate ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
+          >
             {subscription?.status === "TRIAL" && trialDaysRemaining > 0 ? (
               <>
                 <StatusCard label="Status" value="Trial active" />
@@ -50,14 +80,12 @@ export default async function AccountPage() {
                   label="Current plan"
                   value={stripeSubscriptionSummary?.planLabel ?? "Unknown"}
                 />
-                <StatusCard
-                  label="Next billing date"
-                  value={
-                    stripeSubscriptionSummary?.nextBillingDate
-                      ? formatDisplayDate(stripeSubscriptionSummary.nextBillingDate)
-                      : "Unavailable"
-                  }
-                />
+                {stripeSubscriptionSummary?.nextBillingDate ? (
+                  <StatusCard
+                    label="Next billing date"
+                    value={formatDisplayDate(stripeSubscriptionSummary.nextBillingDate)}
+                  />
+                ) : null}
               </>
             )}
           </CardContent>
@@ -71,7 +99,10 @@ export default async function AccountPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
-            <PlanOptions disabled={subscription?.status === "ACTIVE"} />
+            <PlanOptions
+              disabled={subscription?.status === "ACTIVE"}
+              returnPath="/account"
+            />
           </CardContent>
         </Card>
 
@@ -93,6 +124,19 @@ export default async function AccountPage() {
   );
 }
 
+function getCheckoutErrorMessage(error?: string) {
+  if (!error) {
+    return null;
+  }
+
+  switch (error) {
+    case "checkout-unavailable":
+      return "Stripe checkout is temporarily unavailable. Please try again.";
+    default:
+      return decodeURIComponent(error);
+  }
+}
+
 function StatusCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-muted)]/45 px-4 py-2.5">
@@ -102,6 +146,35 @@ function StatusCard({ label, value }: { label: string; value: string }) {
       <p className="mt-1.5 text-base font-semibold text-[var(--foreground)]">
         {value}
       </p>
+    </div>
+  );
+}
+
+function AccountStatusBanner({
+  icon,
+  title,
+  description,
+  tone,
+}: {
+  icon: string;
+  title: string;
+  description: string;
+  tone: "success" | "error";
+}) {
+  const toneClasses =
+    tone === "success"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+      : "border-rose-200 bg-rose-50 text-rose-800";
+
+  return (
+    <div className={`rounded-2xl border px-4 py-3 ${toneClasses}`}>
+      <div className="flex items-start gap-3">
+        <MaterialIcon name={icon} className="mt-0.5 text-[20px]" />
+        <div>
+          <p className="font-semibold">{title}</p>
+          <p className="text-sm opacity-90">{description}</p>
+        </div>
+      </div>
     </div>
   );
 }
