@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import { requireActiveTenantContext } from "@/auth/tenant";
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { isAdminEmail } from "@/lib/admin";
 import {
   getTrialBadgeLabel,
   getTrialBadgeVariant,
@@ -21,18 +22,20 @@ export default async function AppLayout({
     subscription?.status === "TRIAL"
       ? getTrialDaysRemaining(subscription.trialEndsAt)
       : null;
+  const showAdminLink = isAdminEmail(tenant.emailAddress);
 
   return (
     <div className="h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)] print:h-auto print:overflow-visible">
       <div className="flex h-full min-h-0 w-full print:block print:h-auto">
         <div className="hidden h-full w-[272px] shrink-0 border-r border-white/10 md:flex print:hidden">
-          <AppSidebar />
+          <AppSidebar showAdminLink={showAdminLink} />
         </div>
 
         <div className="flex h-full min-h-0 min-w-0 flex-1 w-full flex-col overflow-hidden print:block print:h-auto print:overflow-visible">
           <AppHeader
             workshopName={tenant.workshopName}
             emailAddress={tenant.emailAddress}
+            showAdminLink={showAdminLink}
             trialBadgeLabel={
               trialDaysRemaining ? getTrialBadgeLabel(trialDaysRemaining) : null
             }

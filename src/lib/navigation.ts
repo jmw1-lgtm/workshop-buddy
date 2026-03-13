@@ -1,6 +1,6 @@
 import { IN_APP_ACCOUNT_PATH } from "@/lib/paths";
 
-export const appNavigation = [
+const baseNavigation = [
   {
     href: "/dashboard",
     label: "Dashboard",
@@ -32,3 +32,19 @@ export const appNavigation = [
     description: "Workshop preferences",
   },
 ] as const;
+
+export function getAppNavigation(options?: { includeAdmin?: boolean }) {
+  if (!options?.includeAdmin) {
+    return baseNavigation;
+  }
+
+  return [
+    ...baseNavigation,
+    {
+      href: "/admin",
+      label: "Admin",
+      icon: "shield_person",
+      description: "Internal account view",
+    },
+  ] as const;
+}

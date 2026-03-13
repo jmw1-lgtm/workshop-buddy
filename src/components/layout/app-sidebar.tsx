@@ -5,12 +5,17 @@ import { usePathname } from "next/navigation";
 
 import { MaterialIcon } from "@/components/layout/material-icon";
 import { Logo } from "@/components/ui/logo";
-import { appNavigation } from "@/lib/navigation";
+import { getAppNavigation } from "@/lib/navigation";
 import { businessDetails } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
-export function AppSidebar() {
+type AppSidebarProps = {
+  showAdminLink?: boolean;
+};
+
+export function AppSidebar({ showAdminLink = false }: AppSidebarProps) {
   const pathname = usePathname();
+  const navigation = getAppNavigation({ includeAdmin: showAdminLink });
 
   return (
     <aside className="flex h-full w-full flex-col overflow-y-auto bg-[var(--sidebar-background)] px-4 py-5 text-[var(--sidebar-foreground)]">
@@ -24,7 +29,7 @@ export function AppSidebar() {
       </div>
 
       <nav className="mt-8 flex flex-1 flex-col gap-2">
-        {appNavigation.map((item) => {
+        {navigation.map((item) => {
           const isActive = pathname === item.href;
 
           return (

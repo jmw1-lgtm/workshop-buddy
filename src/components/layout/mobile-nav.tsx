@@ -6,11 +6,16 @@ import { usePathname } from "next/navigation";
 import { MaterialIcon } from "@/components/layout/material-icon";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { appNavigation } from "@/lib/navigation";
+import { getAppNavigation } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
-export function MobileNav() {
+type MobileNavProps = {
+  showAdminLink?: boolean;
+};
+
+export function MobileNav({ showAdminLink = false }: MobileNavProps) {
   const pathname = usePathname();
+  const navigation = getAppNavigation({ includeAdmin: showAdminLink });
 
   return (
     <Sheet>
@@ -32,7 +37,7 @@ export function MobileNav() {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            {appNavigation.map((item) => {
+            {navigation.map((item) => {
               const isActive = pathname === item.href;
 
               return (

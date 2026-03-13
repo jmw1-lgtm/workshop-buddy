@@ -9,6 +9,7 @@ type AppHeaderProps = {
   emailAddress: string | null;
   trialBadgeLabel?: string | null;
   trialBadgeVariant?: "info" | "warning" | "danger";
+  showAdminLink?: boolean;
 };
 
 export function AppHeader({
@@ -16,11 +17,12 @@ export function AppHeader({
   emailAddress,
   trialBadgeLabel,
   trialBadgeVariant = "info",
+  showAdminLink = false,
 }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-30 flex h-20 w-full min-w-0 shrink-0 items-center justify-between border-b border-[var(--surface-border)] bg-[var(--topbar-background)] px-4 backdrop-blur-sm sm:px-6 print:hidden">
       <div className="flex items-center gap-3">
-        <MobileNav />
+        <MobileNav showAdminLink={showAdminLink} />
         <p className="truncate text-lg font-semibold text-[var(--foreground)]">
           {workshopName}
         </p>
