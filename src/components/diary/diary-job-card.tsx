@@ -39,9 +39,9 @@ export function DiaryJobCard({
 
   const resolvedDensity = compact ? "small" : density ?? "large";
   const isWeekView = view === "week";
-  const showCustomer = resolvedDensity === "medium" || resolvedDensity === "large";
   const bottomMeta = `${job.durationMins} minutes`;
-  const weekSecondary = resolvedDensity === "small" ? job.jobTypeName : job.customerName;
+  const primaryLabel = `${job.vehicleRegistration} - ${job.customerName}`;
+  const weekSecondary = job.jobTypeName;
 
   return (
     <article
@@ -85,7 +85,7 @@ export function DiaryJobCard({
           resolvedDensity === "small" ? 0.05 : 0.07,
         ),
       }}
-      aria-label={`Open job card for ${job.vehicleRegistration}`}
+      aria-label={`Open job card for ${job.vehicleRegistration} - ${job.customerName}`}
     >
       <span
         className="absolute inset-y-0 left-0 w-2"
@@ -114,7 +114,7 @@ export function DiaryJobCard({
                 resolvedDensity === "small" ? "text-base" : "text-lg",
               )}
             >
-              {job.vehicleRegistration}
+              {primaryLabel}
             </p>
           </div>
         </div>
@@ -131,13 +131,6 @@ export function DiaryJobCard({
             </p>
           </div>
         )}
-        {!isWeekView && showCustomer ? (
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-[var(--foreground)]">
-              {job.customerName}
-            </p>
-          </div>
-        ) : null}
         {isWeekView ? null : (
           <div className="mt-auto text-xs font-medium text-[var(--muted-foreground)]">
             <span className="truncate">{bottomMeta}</span>

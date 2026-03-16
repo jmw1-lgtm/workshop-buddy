@@ -189,7 +189,7 @@ function HeroVisual() {
     <div className="relative mx-auto max-w-[860px] lg:-mr-6">
       <div className="absolute inset-x-10 top-6 h-28 rounded-[2.5rem] bg-[linear-gradient(180deg,rgba(163,206,241,0.24),rgba(231,236,239,0))] blur-3xl" />
       <Image
-        src="/screenshots/diary-main-week-tab.png"
+        src="/screenshots/diary-main-week-tab2.png"
         alt="Workshop Buddy diary view screenshot"
         width={1600}
         height={1040}
@@ -290,7 +290,7 @@ export function MarketingHomePage() {
 
         <div className="mt-8">
           <Image
-            src="/screenshots/diary-main-tab.png"
+            src="/screenshots/diary-main-tab2.png"
             alt="Workshop Buddy diary view screen"
             width={1600}
             height={1040}
