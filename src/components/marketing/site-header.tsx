@@ -16,8 +16,8 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
         <Link href="/" className="flex items-center gap-3">
           <Logo
-            size={28}
-            imageClassName="size-7"
+            size={44}
+            imageClassName="h-10 w-auto sm:h-11"
             textClassName="text-sm text-[var(--foreground)]"
           />
         </Link>

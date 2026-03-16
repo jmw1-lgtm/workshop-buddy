@@ -9,23 +9,23 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 const featureCards = [
   {
     icon: "calendar_month",
-    title: "Smart workshop diary scheduling",
-    description: "Book jobs into a clear day view and keep technician time organised without the paper diary.",
+    title: "Smart workshop diary",
+    description: "Book jobs into a clear day view and keep the front desk organised without the paper diary.",
   },
   {
     icon: "open_with",
-    title: "Drag-and-drop job rescheduling",
+    title: "Easy job rescheduling",
     description: "Move bookings quickly when the day changes or a customer runs late.",
   },
   {
     icon: "history",
-    title: "Customer and vehicle history",
+    title: "Customer and vehicle records",
     description: "Keep registrations, vehicles, and repeat customers organised in one place.",
   },
   {
     icon: "description",
-    title: "Job cards and printable worksheets",
-    description: "Capture the booking once, then open or print clear job sheets for the workshop.",
+    title: "Job cards and worksheets",
+    description: "Create job cards, capture work details, and keep workshop paperwork organised.",
   },
 ];
 
@@ -33,12 +33,12 @@ const workflowSteps = [
   {
     number: "1",
     title: "Book the job",
-    description: "Add the customer, find the vehicle, and place the work into the workshop diary.",
+    description: "Add the customer, vehicle, and job details, then place the work into the diary.",
   },
   {
     number: "2",
     title: "Run the day",
-    description: "Reschedule jobs quickly, track arrivals, and keep technician capacity visible.",
+    description: "Adjust bookings quickly, keep arrivals visible, and stay on top of workshop capacity.",
   },
   {
     number: "3",
@@ -49,32 +49,28 @@ const workflowSteps = [
 
 const showcaseScreens = [
   {
-    name: "Dashboard",
-    caption: "Live workshop overview and queue status.",
-    accent: "rgba(39,76,119,0.12)",
-    imageSrc: "/screenshots/dashboard-queue.png",
-    imageAlt: "Workshop Buddy dashboard queue screenshot",
+    name: "Next available slot",
+    caption: "Quickly see the next available time to book new work into the diary.",
+    imageSrc: "/screenshots/next-available.png",
+    imageAlt: "Workshop Buddy next available slot screenshot",
   },
   {
-    name: "Day Diary",
-    caption: "The daily booking view for reception.",
-    accent: "rgba(96,150,186,0.18)",
-    imageSrc: "/screenshots/day-diary.png",
-    imageAlt: "Workshop Buddy day diary screenshot",
+    name: "Upcoming workload",
+    caption: "Stay ahead of the day with a clear view of upcoming jobs and workshop capacity.",
+    imageSrc: "/screenshots/upcoming.png",
+    imageAlt: "Workshop Buddy upcoming workload screenshot",
   },
   {
     name: "Job Card",
-    caption: "Notes, status, and print-ready job sheets.",
-    accent: "rgba(163,206,241,0.28)",
-    imageSrc: "/screenshots/job-card.png",
+    caption: "Capture job details, notes, and work completed with clear job cards.",
+    imageSrc: "/screenshots/job-card2.png",
     imageAlt: "Workshop Buddy job card screenshot",
   },
   {
-    name: "Customers",
-    caption: "People, vehicles, and workshop history.",
-    accent: "rgba(139,140,137,0.2)",
-    imageSrc: "/screenshots/customers.png",
-    imageAlt: "Workshop Buddy customers screenshot",
+    name: "Customer records",
+    caption: "Keep customer details, vehicles, and service history organised in one place.",
+    imageSrc: "/screenshots/customers2.png",
+    imageAlt: "Workshop Buddy customer records screenshot",
   },
 ];
 
@@ -84,24 +80,24 @@ const pricingPlans = [
     price: "£49",
     cadence: "per workshop / month",
     points: [
-      "Workshop diary and bookings",
-      "Customer and vehicle history",
+      "Workshop diary and booking calendar",
+      "Customer and vehicle records",
       "Job cards and printable worksheets",
     ],
-    reassurance: "Cancel anytime.",
+    reassurance: ["No credit card required", "Cancel anytime"],
     featured: false,
   },
   {
     name: "Yearly",
     price: "£490",
     cadence: "per workshop / year",
-    priceNote: "£41/month billed yearly",
+    priceNote: "Equivalent to £41 per month",
     points: [
       "Everything in Monthly",
       "Save two months with annual billing",
       "Free trial before billing",
     ],
-    reassurance: "Cancel anytime.",
+    reassurance: ["No credit card required", "Cancel anytime"],
     featured: true,
   },
 ];
@@ -109,15 +105,31 @@ const pricingPlans = [
 const faqs = [
   {
     question: "Who is Workshop Buddy for?",
-    answer: "Independent garages and workshops with small teams and busy reception desks.",
-  },
-  {
-    question: "Can we still print job cards?",
-    answer: "Yes. Printable worksheets remain part of the core workflow for the workshop floor.",
+    answer: "Workshop Buddy is designed for independent garages and small workshops with busy reception desks and small teams.",
   },
   {
     question: "Does it replace a paper diary?",
-    answer: "That is the main goal. It gives reception a faster and clearer way to run the day.",
+    answer: "Yes. Printable worksheets remain part of the core workflow for the workshop floor.",
+  },
+  {
+    question: "Can we still print job cards?",
+    answer: "Yes. Printable worksheets remain part of the workflow so technicians can still work from printed job sheets if needed.",
+  },
+  {
+    question: "Do I need a credit card to start the trial?",
+    answer: "No. You can start the 14-day free trial without entering any payment details.",
+  },
+  {
+    question: "How long does setup take?",
+    answer: "Most workshops can start using Workshop Buddy in just a few minutes. There is no complicated setup or training required.",
+  },
+  {
+    question: "Can we use Workshop Buddy on a tablet?",
+    answer: "Yes. Workshop Buddy works in any modern web browser, so it can be used on desktop computers, laptops, and tablets at the reception desk or around the workshop.",
+  },
+  {
+    question: "Is the price per user?",
+    answer: "No. Pricing is per workshop, so your whole team can use the system.",
   },
 ];
 
@@ -146,130 +158,44 @@ function SectionIntro({
 function PreviewShell({
   title,
   caption,
-  accent,
-  compact = false,
   imageSrc,
   imageAlt,
 }: {
   title: string;
   caption: string;
-  accent: string;
-  compact?: boolean;
   imageSrc?: string;
   imageAlt?: string;
 }) {
   return (
-    <div className="overflow-hidden rounded-[2rem] border border-[var(--primary-pale)]/70 bg-[var(--background)] shadow-[0_22px_60px_rgba(39,76,119,0.1)]">
-      <div
-        className="border-b border-[var(--surface-border)] px-5 py-4"
-        style={{ background: `linear-gradient(135deg, ${accent}, rgba(231,236,239,0.92))` }}
-      >
-        <p className="text-base font-semibold text-[var(--foreground)]">{title}</p>
-        <p className="mt-1 text-sm text-[var(--muted-foreground)]">{caption}</p>
-      </div>
-
-      <div className="p-5">
-        <div className="rounded-[1.5rem] border border-[var(--surface-border)] bg-[var(--surface-muted)] p-4">
-          <div className="flex items-center gap-2">
-            <span className="size-2.5 rounded-full bg-[var(--primary)]" />
-            <span className="size-2.5 rounded-full bg-[var(--primary-soft)]" />
-            <span className="size-2.5 rounded-full bg-[var(--primary-pale)]" />
-          </div>
-
-          {imageSrc ? (
-            <div className="mt-4 rounded-[1.25rem] border border-[var(--surface-border)] bg-[var(--background)] p-3 shadow-[0_14px_34px_rgba(39,76,119,0.1)]">
-              <div className="relative overflow-hidden rounded-[1rem] border border-[var(--surface-border)] bg-[var(--background)]">
-                <Image
-                  src={imageSrc}
-                  alt={imageAlt ?? title}
-                  width={1600}
-                  height={1040}
-                  className="h-auto w-full"
-                  priority={!compact}
-                />
-              </div>
-            </div>
-          ) : compact ? (
-            <div className="mt-4 grid gap-3">
-              <div className="h-5 w-2/5 rounded-full bg-[var(--background)]" />
-              <div className="grid grid-cols-2 gap-3">
-                <div className="h-24 rounded-[1rem] bg-[var(--background)]" />
-                <div className="h-24 rounded-[1rem] bg-[var(--background)]" />
-              </div>
-              <div className="h-20 rounded-[1rem] bg-[var(--background)]" />
-            </div>
-          ) : (
-            <div className="mt-4 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-              <div className="rounded-[1.2rem] bg-[var(--background)] p-4">
-                <div className="h-5 w-32 rounded-full bg-[var(--surface-muted)]" />
-                <div className="mt-4 space-y-3">
-                  <div className="h-12 rounded-2xl bg-[rgba(96,150,186,0.18)]" />
-                  <div className="h-12 rounded-2xl bg-[rgba(39,76,119,0.14)]" />
-                  <div className="h-12 rounded-2xl bg-[rgba(163,206,241,0.24)]" />
-                  <div className="h-12 rounded-2xl bg-[rgba(139,140,137,0.18)]" />
-                </div>
-              </div>
-              <div className="grid gap-3">
-                <div className="rounded-[1.2rem] bg-[var(--background)] p-4">
-                  <div className="h-4 w-20 rounded-full bg-[var(--surface-muted)]" />
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    <div className="h-14 rounded-xl bg-[var(--surface-muted)]" />
-                    <div className="h-14 rounded-xl bg-[var(--surface-muted)]" />
-                    <div className="h-14 rounded-xl bg-[var(--surface-muted)]" />
-                    <div className="h-14 rounded-xl bg-[var(--surface-muted)]" />
-                  </div>
-                </div>
-                <div className="rounded-[1.2rem] bg-[linear-gradient(135deg,rgba(39,76,119,1),rgba(96,150,186,0.92))] p-4 text-[var(--background)]">
-                  <div className="h-4 w-24 rounded-full bg-[var(--background)]/30" />
-                  <div className="mt-3 space-y-2">
-                    <div className="h-3 rounded-full bg-[var(--background)]/25" />
-                    <div className="h-3 rounded-full bg-[var(--background)]/25" />
-                    <div className="h-3 w-4/5 rounded-full bg-[var(--background)]/25" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+    <div className="rounded-[2rem] border border-[var(--primary-pale)]/70 bg-[rgba(231,236,239,0.9)] p-5 shadow-[0_18px_40px_rgba(39,76,119,0.08)] sm:p-6">
+      <p className="text-xl font-semibold leading-7 text-[var(--foreground)]">{title}</p>
+      <p className="mt-2.5 text-sm leading-6 text-[var(--muted-foreground)]">{caption}</p>
+      {imageSrc ? (
+        <Image
+          src={imageSrc}
+          alt={imageAlt ?? title}
+          width={1600}
+          height={1040}
+          className="mt-5 h-auto w-full max-w-full rounded-[1rem] border border-[var(--surface-border)]/70 shadow-[0_10px_24px_rgba(39,76,119,0.06)]"
+          priority
+        />
+      ) : null}
     </div>
   );
 }
 
 function HeroVisual() {
   return (
-    <div className="relative mx-auto max-w-[780px]">
-      <div className="absolute inset-x-8 top-4 h-24 rounded-[2rem] bg-[linear-gradient(180deg,rgba(163,206,241,0.26),rgba(231,236,239,0))] blur-2xl" />
-      <div className="relative overflow-hidden rounded-[2.5rem] border border-[var(--primary-pale)]/70 bg-[var(--background)] shadow-[0_34px_90px_rgba(39,76,119,0.2)]">
-        <div className="flex items-center justify-between border-b border-[var(--surface-border)] bg-[linear-gradient(180deg,rgba(231,236,239,0.98),rgba(163,206,241,0.18))] px-5 py-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
-              Workshop Buddy
-            </p>
-            <p className="mt-1 text-base font-semibold text-[var(--foreground)]">
-              Live diary view
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="size-2.5 rounded-full bg-[var(--primary)]" />
-            <span className="size-2.5 rounded-full bg-[var(--primary-soft)]" />
-            <span className="size-2.5 rounded-full bg-[var(--primary-pale)]" />
-          </div>
-        </div>
-
-        <div className="p-4 sm:p-5">
-          <div className="relative overflow-hidden rounded-[1.6rem] border border-[var(--surface-border)] bg-[var(--background)] shadow-[0_18px_44px_rgba(39,76,119,0.12)]">
-            <Image
-              src="/screenshots/diary-main-week.png"
-              alt="Workshop Buddy diary view screenshot"
-              width={1600}
-              height={1040}
-              priority
-              className="h-auto w-full"
-            />
-          </div>
-        </div>
-      </div>
+    <div className="relative mx-auto max-w-[860px] lg:-mr-6">
+      <div className="absolute inset-x-10 top-6 h-28 rounded-[2.5rem] bg-[linear-gradient(180deg,rgba(163,206,241,0.24),rgba(231,236,239,0))] blur-3xl" />
+      <Image
+        src="/screenshots/diary-main-week-tab.png"
+        alt="Workshop Buddy diary view screenshot"
+        width={1600}
+        height={1040}
+        priority
+        className="relative h-auto w-full"
+      />
     </div>
   );
 }
@@ -279,25 +205,25 @@ export function MarketingHomePage() {
     <main className="overflow-hidden">
       <section className="relative" aria-labelledby="marketing-hero-title">
         <div className="absolute inset-x-0 top-0 h-[560px] bg-[radial-gradient(circle_at_16%_18%,rgba(163,206,241,0.38),transparent_24%),radial-gradient(circle_at_84%_16%,rgba(96,150,186,0.18),transparent_26%)]" />
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 pb-20 pt-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-14 lg:pt-20">
+        <div className="mx-auto grid max-w-7xl gap-10 px-6 pb-20 pt-14 lg:grid-cols-[0.84fr_1.16fr] lg:items-center lg:gap-12 lg:pt-20">
           <header className="relative z-10 space-y-8">
             <div className="space-y-5">
               <Badge className="bg-[var(--background)]/88 text-[var(--primary)] shadow-sm">
-                Garage management software for independent workshops
+                Garage software for independent workshops
               </Badge>
               <div className="space-y-4">
                 <h1
                   id="marketing-hero-title"
-                  className="max-w-[11ch] text-5xl font-semibold tracking-tight text-[var(--foreground)] sm:text-6xl lg:text-[4.35rem]"
+                  className="max-w-[9ch] text-5xl font-semibold tracking-tight text-[var(--foreground)] sm:text-6xl lg:text-[4.35rem]"
                 >
-                  Replace your workshop diary
+                  Replace the paper diary
                 </h1>
                 <p
                   id="marketing-hero-description"
-                  className="max-w-[31rem] text-base leading-7 text-[var(--muted-foreground)] sm:text-lg sm:leading-8"
+                  className="max-w-[30rem] text-base leading-7 text-[var(--muted-foreground)] sm:text-lg sm:leading-8"
                 >
-                  Workshop Buddy helps reception staff manage bookings, job cards and
-                  technician availability in one simple digital diary.
+                  Workshop Buddy helps independent garages schedule jobs, manage customers
+                  and vehicles in one simple system.
                 </p>
               </div>
             </div>
@@ -321,7 +247,7 @@ export function MarketingHomePage() {
                 </Button>
               </div>
               <p className="pl-1 text-sm font-medium text-[var(--muted-foreground)]/90">
-                No credit card required
+                No credit card required • 14-day free trial • Cancel anytime
               </p>
             </div>
           </header>
@@ -357,18 +283,19 @@ export function MarketingHomePage() {
 
       <section id="product-preview" className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
         <SectionIntro
-          eyebrow="Product preview"
-          title="A clear diary view built for the front desk."
-          description="The diary is the core screen. It keeps today visible and makes booking work faster than paper."
+          eyebrow="Workshop diary"
+          title="A simple diary built for busy workshops"
+          description="See the day clearly, move jobs quickly, and keep the front desk organised with a diary designed for independent garages."
         />
 
         <div className="mt-10">
-          <PreviewShell
-            title="Diary view"
-            caption="The main reception diary view for booking and rescheduling work."
-            accent="rgba(96,150,186,0.18)"
-            imageSrc="/screenshots/day-diary.png"
-            imageAlt="Workshop Buddy day diary screen"
+          <Image
+            src="/screenshots/diary-main-tab.png"
+            alt="Workshop Buddy diary view screen"
+            width={1600}
+            height={1040}
+            className="mx-auto h-auto w-full max-w-[900px] drop-shadow-[0_16px_32px_rgba(39,76,119,0.08)]"
+            priority
           />
         </div>
       </section>
@@ -376,16 +303,16 @@ export function MarketingHomePage() {
       <section id="features" className="bg-[linear-gradient(180deg,rgba(231,236,239,0.6),rgba(163,206,241,0.12))]">
         <div className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
           <SectionIntro
-            eyebrow="Features"
-            title="Core tools for running a busy workshop"
-            description="Four essential tools to manage bookings, jobs, and customers without the paper diary."
+            eyebrow="Core features"
+            title="Everything needed to run a busy workshop"
+            description="Workshop Buddy gives independent garages the core tools needed to manage bookings, customers, vehicles, and daily workshop flow in one place."
           />
 
           <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {featureCards.map((feature) => (
               <div
                 key={feature.title}
-                className="rounded-[2rem] border bg-white p-6 shadow-[0_18px_40px_rgba(39,76,119,0.08)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_24px_54px_rgba(39,76,119,0.12)]"
+                className="rounded-[2rem] border bg-white p-6 shadow-[0_18px_40px_rgba(39,76,119,0.08)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_24px_54px_rgba(39,76,119,0.12)] sm:p-7"
                 style={{ borderColor: "rgba(163,206,241,0.65)" }}
               >
                 <div
@@ -394,8 +321,12 @@ export function MarketingHomePage() {
                 >
                   <MaterialIcon name={feature.icon} className="text-[24px] text-[var(--primary)]" />
                 </div>
-                <h3 className="mt-5 text-xl font-semibold text-[var(--foreground)]">{feature.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">{feature.description}</p>
+                <h3 className="mt-6 text-xl font-semibold leading-7 text-[var(--foreground)]">
+                  {feature.title}
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
@@ -404,23 +335,22 @@ export function MarketingHomePage() {
 
       <section id="how-it-works" className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
         <SectionIntro
-          eyebrow="Workflow"
+          eyebrow="How it works"
           title="From booking to collection in three simple steps"
-          description="Designed around how a small independent garage actually runs."
+          description="Built around the way independent garages actually manage the day."
         />
 
         <div className="mt-10 grid gap-5 lg:grid-cols-3">
-          {workflowSteps.map((step, index) => (
+          {workflowSteps.map((step) => (
             <div key={step.number} className="relative">
-              {index < workflowSteps.length - 1 ? (
-                <div className="absolute left-[5.2rem] right-[-1rem] top-8 hidden h-px bg-[linear-gradient(90deg,rgba(39,76,119,0.35),rgba(163,206,241,0.14))] lg:block" />
-              ) : null}
-              <div className="rounded-[2rem] border border-[var(--primary-pale)]/70 bg-[var(--background)]/90 p-6 shadow-[0_18px_46px_rgba(39,76,119,0.08)]">
-                <div className="flex size-16 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(39,76,119,1),rgba(96,150,186,0.92))] text-lg font-semibold text-[var(--background)]">
+              <div className="rounded-[2rem] border border-[var(--primary-pale)]/70 bg-[var(--background)]/90 p-6 shadow-[0_18px_46px_rgba(39,76,119,0.08)] sm:p-7">
+                <div className="flex size-16 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(39,76,119,1),rgba(96,150,186,0.92))] text-lg font-semibold text-[var(--background)] shadow-[0_12px_24px_rgba(39,76,119,0.12)]">
                   {step.number}
                 </div>
-                <h3 className="mt-5 text-xl font-semibold text-[var(--foreground)]">{step.title}</h3>
-                <p className="mt-2 max-w-xs text-sm leading-6 text-[var(--muted-foreground)]">
+                <h3 className="mt-6 text-xl font-semibold leading-7 text-[var(--foreground)]">
+                  {step.title}
+                </h3>
+                <p className="mt-3 max-w-xs text-sm leading-6 text-[var(--muted-foreground)]">
                   {step.description}
                 </p>
               </div>
@@ -433,8 +363,8 @@ export function MarketingHomePage() {
         <div className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
           <SectionIntro
             eyebrow="Screen showcase"
-            title="Preview the key screens across the workflow."
-            description="These framed areas are ready for real screenshots of the dashboard, diary, job card, and customers views."
+            title="Key screens used every day in the workshop"
+            description="Workshop Buddy keeps bookings, jobs, and customers organised with simple screens designed for the front desk."
           />
 
           <div className="mt-10 grid gap-5 md:grid-cols-2">
@@ -443,10 +373,8 @@ export function MarketingHomePage() {
                 key={screen.name}
                 title={screen.name}
                 caption={screen.caption}
-                accent={screen.accent}
                 imageSrc={screen.imageSrc}
                 imageAlt={screen.imageAlt}
-                compact
               />
             ))}
           </div>
@@ -454,11 +382,16 @@ export function MarketingHomePage() {
       </section>
 
       <section id="pricing" className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-        <SectionIntro
-          eyebrow="Pricing"
-          title="Simple pricing for independent garages"
-          description="Start with a free trial. Choose monthly or yearly when you're ready."
-        />
+        <div className="space-y-4">
+          <SectionIntro
+            eyebrow="Pricing"
+            title="Simple pricing for independent garages"
+            description="Start with a free trial. Choose monthly or yearly when you're ready."
+          />
+          <p className="text-sm font-medium text-[var(--muted-foreground)]">
+            No credit card required • 14-day free trial • Cancel anytime
+          </p>
+        </div>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-2">
           {pricingPlans.map((plan) => (
@@ -533,12 +466,14 @@ export function MarketingHomePage() {
                   <Link href="/sign-up">Start free trial</Link>
                 </Button>
                 <p
-                  className="mt-3 text-sm"
-                  style={{
-                    color: plan.featured ? "rgba(231,236,239,0.78)" : "var(--muted-foreground)",
-                  }}
+                  className="mt-3 space-y-1 text-sm"
+                  style={{ color: plan.featured ? "rgba(231,236,239,0.78)" : "var(--muted-foreground)" }}
                 >
-                  {plan.reassurance}
+                  {plan.reassurance.map((line) => (
+                    <span key={line} className="block">
+                      {line}
+                    </span>
+                  ))}
                 </p>
               </div>
             </div>
@@ -550,7 +485,7 @@ export function MarketingHomePage() {
         <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
           <SectionIntro
             eyebrow="FAQ"
-            title="Short answers to the first questions workshops ask."
+            title="Common questions from independent garages"
             description="Keep the buying journey simple with quick answers and a clear next step."
           />
 
