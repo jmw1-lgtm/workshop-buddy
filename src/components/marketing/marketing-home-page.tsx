@@ -50,7 +50,7 @@ const workflowSteps = [
 const showcaseScreens = [
   {
     name: "Next available slot",
-    caption: "Quickly see the next available time to book new work into the diary.",
+    caption: "See the next available slot and book new work faster.",
     imageSrc: "/screenshots/next-available.png",
     imageAlt: "Workshop Buddy next available slot screenshot",
   },
@@ -94,7 +94,7 @@ const pricingPlans = [
     priceNote: "Equivalent to £41 per month",
     points: [
       "Everything in Monthly",
-      "Save two months with annual billing",
+      "Save two months compared with paying monthly",
       "Free trial before billing",
     ],
     reassurance: ["No credit card required", "Cancel anytime"],
@@ -109,7 +109,7 @@ const faqs = [
   },
   {
     question: "Does it replace a paper diary?",
-    answer: "Yes. Printable worksheets remain part of the core workflow for the workshop floor.",
+    answer: "Yes. Workshop Buddy replaces the traditional paper diary with a clear digital workshop schedule that is easier to update and manage during the day.",
   },
   {
     question: "Can we still print job cards?",
@@ -143,7 +143,7 @@ function SectionIntro({
   description: string;
 }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <Badge className="bg-[var(--primary-pale)]/75 text-[var(--primary)]">{eyebrow}</Badge>
       <h2 className="max-w-2xl text-3xl font-semibold tracking-tight text-[var(--foreground)] sm:text-4xl">
         {title}
@@ -167,16 +167,16 @@ function PreviewShell({
   imageAlt?: string;
 }) {
   return (
-    <div className="rounded-[2rem] border border-[var(--primary-pale)]/70 bg-[rgba(231,236,239,0.9)] p-5 shadow-[0_18px_40px_rgba(39,76,119,0.08)] sm:p-6">
+    <div className="rounded-[2rem] border border-[var(--primary-pale)]/70 bg-[rgba(231,236,239,0.9)] p-4.5 shadow-[0_18px_40px_rgba(39,76,119,0.08)] sm:p-5">
       <p className="text-xl font-semibold leading-7 text-[var(--foreground)]">{title}</p>
-      <p className="mt-2.5 text-sm leading-6 text-[var(--muted-foreground)]">{caption}</p>
+      <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">{caption}</p>
       {imageSrc ? (
         <Image
           src={imageSrc}
           alt={imageAlt ?? title}
           width={1600}
           height={1040}
-          className="mt-5 h-auto w-full max-w-full rounded-[1rem] border border-[var(--surface-border)]/70 shadow-[0_10px_24px_rgba(39,76,119,0.06)]"
+          className="mt-4 h-auto w-full max-w-full rounded-[1rem] border border-[var(--surface-border)]/70 shadow-[0_10px_24px_rgba(39,76,119,0.06)]"
           priority
         />
       ) : null}
@@ -222,8 +222,8 @@ export function MarketingHomePage() {
                   id="marketing-hero-description"
                   className="max-w-[30rem] text-base leading-7 text-[var(--muted-foreground)] sm:text-lg sm:leading-8"
                 >
-                  Workshop Buddy helps independent garages schedule jobs, manage customers
-                  and vehicles in one simple system.
+                  Workshop Buddy helps independent garages book work faster, manage
+                  customers and vehicles, and keep the day organised.
                 </p>
               </div>
             </div>
@@ -281,14 +281,14 @@ export function MarketingHomePage() {
         </div>
       </section>
 
-      <section id="product-preview" className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
+      <section id="product-preview" className="mx-auto max-w-7xl px-6 py-[4.5rem] sm:py-20">
         <SectionIntro
           eyebrow="Workshop diary"
           title="A simple diary built for busy workshops"
-          description="See the day clearly, move jobs quickly, and keep the front desk organised with a diary designed for independent garages."
+          description="See the day clearly, move jobs quickly, and keep the front desk organised."
         />
 
-        <div className="mt-10">
+        <div className="mt-8">
           <Image
             src="/screenshots/diary-main-tab.png"
             alt="Workshop Buddy diary view screen"
@@ -301,18 +301,18 @@ export function MarketingHomePage() {
       </section>
 
       <section id="features" className="bg-[linear-gradient(180deg,rgba(231,236,239,0.6),rgba(163,206,241,0.12))]">
-        <div className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
+        <div className="mx-auto max-w-7xl px-6 py-[4.5rem] sm:py-20">
           <SectionIntro
             eyebrow="Core features"
             title="Everything needed to run a busy workshop"
             description="Workshop Buddy gives independent garages the core tools needed to manage bookings, customers, vehicles, and daily workshop flow in one place."
           />
 
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {featureCards.map((feature) => (
               <div
                 key={feature.title}
-                className="rounded-[2rem] border bg-white p-6 shadow-[0_18px_40px_rgba(39,76,119,0.08)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_24px_54px_rgba(39,76,119,0.12)] sm:p-7"
+                className="rounded-[2rem] border bg-white p-5 shadow-[0_18px_40px_rgba(39,76,119,0.08)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_24px_54px_rgba(39,76,119,0.12)] sm:p-6"
                 style={{ borderColor: "rgba(163,206,241,0.65)" }}
               >
                 <div
@@ -321,10 +321,10 @@ export function MarketingHomePage() {
                 >
                   <MaterialIcon name={feature.icon} className="text-[24px] text-[var(--primary)]" />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold leading-7 text-[var(--foreground)]">
+                <h3 className="mt-5 text-xl font-semibold leading-7 text-[var(--foreground)]">
                   {feature.title}
                 </h3>
-                <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">
+                <p className="mt-2.5 text-sm leading-6 text-[var(--muted-foreground)]">
                   {feature.description}
                 </p>
               </div>
@@ -333,24 +333,24 @@ export function MarketingHomePage() {
         </div>
       </section>
 
-      <section id="how-it-works" className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
+      <section id="how-it-works" className="mx-auto max-w-7xl px-6 py-[4.5rem] sm:py-20">
         <SectionIntro
           eyebrow="How it works"
           title="From booking to collection in three simple steps"
           description="Built around the way independent garages actually manage the day."
         />
 
-        <div className="mt-10 grid gap-5 lg:grid-cols-3">
+        <div className="mt-8 grid gap-4 lg:grid-cols-3">
           {workflowSteps.map((step) => (
             <div key={step.number} className="relative">
-              <div className="rounded-[2rem] border border-[var(--primary-pale)]/70 bg-[var(--background)]/90 p-6 shadow-[0_18px_46px_rgba(39,76,119,0.08)] sm:p-7">
+              <div className="rounded-[2rem] border border-[var(--primary-pale)]/70 bg-[var(--background)]/90 p-5 shadow-[0_18px_46px_rgba(39,76,119,0.08)] sm:p-6">
                 <div className="flex size-16 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(39,76,119,1),rgba(96,150,186,0.92))] text-lg font-semibold text-[var(--background)] shadow-[0_12px_24px_rgba(39,76,119,0.12)]">
                   {step.number}
                 </div>
-                <h3 className="mt-6 text-xl font-semibold leading-7 text-[var(--foreground)]">
+                <h3 className="mt-5 text-xl font-semibold leading-7 text-[var(--foreground)]">
                   {step.title}
                 </h3>
-                <p className="mt-3 max-w-xs text-sm leading-6 text-[var(--muted-foreground)]">
+                <p className="mt-2.5 max-w-xs text-sm leading-6 text-[var(--muted-foreground)]">
                   {step.description}
                 </p>
               </div>
@@ -360,14 +360,14 @@ export function MarketingHomePage() {
       </section>
 
       <section id="screens" className="bg-[linear-gradient(180deg,rgba(39,76,119,0.05),rgba(231,236,239,0.55))]">
-        <div className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
+        <div className="mx-auto max-w-7xl px-6 py-[4.5rem] sm:py-20">
           <SectionIntro
             eyebrow="Screen showcase"
             title="Key screens used every day in the workshop"
-            description="Workshop Buddy keeps bookings, jobs, and customers organised with simple screens designed for the front desk."
+            description="See the screens that help reception book work faster and keep the workshop organised."
           />
 
-          <div className="mt-10 grid gap-5 md:grid-cols-2">
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
             {showcaseScreens.map((screen) => (
               <PreviewShell
                 key={screen.name}
@@ -381,8 +381,8 @@ export function MarketingHomePage() {
         </div>
       </section>
 
-      <section id="pricing" className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-        <div className="space-y-4">
+      <section id="pricing" className="mx-auto max-w-6xl px-6 py-[4.5rem] sm:py-20">
+        <div className="space-y-3">
           <SectionIntro
             eyebrow="Pricing"
             title="Simple pricing for independent garages"
@@ -393,7 +393,7 @@ export function MarketingHomePage() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-5 lg:grid-cols-2">
+        <div className="mt-8 grid gap-4 lg:grid-cols-2">
           {pricingPlans.map((plan) => (
             <div
               key={plan.name}
@@ -423,14 +423,14 @@ export function MarketingHomePage() {
                 ) : null}
               </div>
 
-              <div className="mt-6 text-4xl font-semibold tracking-tight">{plan.price}</div>
+              <div className="mt-5 text-4xl font-semibold tracking-tight">{plan.price}</div>
               {"priceNote" in plan ? (
                 <p className="mt-2 text-sm" style={{ color: "rgba(231,236,239,0.78)" }}>
                   {plan.priceNote}
                 </p>
               ) : null}
 
-              <div className="mt-6 space-y-3">
+              <div className="mt-5 space-y-3">
                 {plan.points.map((point) => (
                   <div key={point} className="flex items-start gap-3">
                     <div
@@ -456,7 +456,7 @@ export function MarketingHomePage() {
                 ))}
               </div>
 
-              <div className="mt-7">
+              <div className="mt-6">
                 <Button
                   size="lg"
                   variant={plan.featured ? "secondary" : "default"}
@@ -482,17 +482,17 @@ export function MarketingHomePage() {
       </section>
 
       <section id="faq" className="bg-[var(--background)]/60">
-        <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl px-6 py-[4.5rem] sm:py-20">
           <SectionIntro
             eyebrow="FAQ"
             title="Common questions from independent garages"
             description="Keep the buying journey simple with quick answers and a clear next step."
           />
 
-          <div className="mt-10 grid gap-4">
+          <div className="mt-8 grid gap-3.5">
             {faqs.map((faq) => (
               <Card key={faq.question} className="border-[var(--primary-pale)]/70 bg-[var(--background)]/92">
-                <CardHeader className="gap-3">
+                <CardHeader className="gap-2.5 p-5 sm:p-6">
                   <CardTitle className="text-xl">{faq.question}</CardTitle>
                   <CardDescription className="max-w-2xl">{faq.answer}</CardDescription>
                 </CardHeader>

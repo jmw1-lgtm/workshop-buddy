@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
+import { AdminAccountsTable } from "@/components/admin/admin-accounts-table";
 import { MaterialIcon } from "@/components/layout/material-icon";
 import { Logo } from "@/components/ui/logo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,10 +70,11 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             Admin
           </p>
           <h1 className="text-3xl font-semibold tracking-tight text-[var(--foreground)]">
-            Admin overview
+            Account admin
           </h1>
           <p className="text-sm leading-6 text-[var(--muted-foreground)]">
-            Monitor garages, trials, and subscriptions across the Workshop Buddy account base.
+            Manage garage accounts, trial access, manual activation, and cleanup across the
+            Workshop Buddy account base.
           </p>
         </section>
 
@@ -100,12 +101,13 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           />
         </section>
 
-        <Card className="overflow-hidden shadow-[0_18px_44px_rgba(39,76,119,0.08)]">
+        <Card className="overflow-visible shadow-[0_18px_44px_rgba(39,76,119,0.08)]">
           <CardHeader className="gap-4 border-b border-[var(--surface-border)] bg-[linear-gradient(180deg,rgba(248,250,252,0.96),rgba(231,236,239,0.72))] pb-4">
             <div className="flex flex-col gap-1">
               <CardTitle>Garage accounts</CardTitle>
               <p className="text-sm leading-6 text-[var(--muted-foreground)]">
-                Read-only account view for garage onboarding, trial state, and billing health.
+                Internal operations view for onboarding state, billing status, and manual
+                account controls. Manual changes can temporarily override Stripe-synced state.
               </p>
             </div>
             <form className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
@@ -145,74 +147,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           </CardHeader>
           <CardContent className="px-0 pb-0">
             {data.rows.length ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full border-separate border-spacing-0">
-                  <thead>
-                    <tr className="bg-[var(--surface-muted)]/45 text-left">
-                      {[
-                        "Garage / account",
-                        "Owner email",
-                        "Created",
-                        "Trial status",
-                        "Trial end date",
-                        "Subscription status",
-                        "Current plan",
-                        "Stripe customer ID",
-                      ].map((heading) => (
-                        <th
-                          key={heading}
-                          className="border-b border-[var(--surface-border)] px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]"
-                        >
-                          {heading}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.rows.map((row) => (
-                      <tr
-                        key={row.workshopId}
-                        className="bg-white transition-colors hover:bg-[var(--surface-muted)]/26"
-                      >
-                        <td className="border-b border-[var(--surface-border)] px-6 py-4.5">
-                          <p className="text-sm font-semibold text-[var(--foreground)]">
-                            {row.workshopName}
-                          </p>
-                        </td>
-                        <td className="border-b border-[var(--surface-border)] px-6 py-4.5 text-sm text-[var(--muted-foreground)]">
-                          <span className="whitespace-nowrap">{row.ownerEmail ?? "No owner email"}</span>
-                        </td>
-                        <td className="border-b border-[var(--surface-border)] px-6 py-4.5 text-sm text-[var(--muted-foreground)] whitespace-nowrap">
-                          {formatCompactDate(row.createdAt)}
-                        </td>
-                        <td className="border-b border-[var(--surface-border)] px-6 py-4.5 whitespace-nowrap">
-                          <AdminStatusBadge
-                            tone={getTrialTone(row.trialLabel)}
-                            label={row.trialLabel}
-                          />
-                        </td>
-                        <td className="border-b border-[var(--surface-border)] px-6 py-4.5 text-sm text-[var(--muted-foreground)] whitespace-nowrap">
-                          {row.trialEndsAt ? formatCompactDate(row.trialEndsAt) : "—"}
-                        </td>
-                        <td className="border-b border-[var(--surface-border)] px-6 py-4.5 whitespace-nowrap">
-                          <AdminStatusBadge
-                            tone={getSubscriptionTone(row.subscriptionStatus)}
-                            label={row.subscriptionStatus}
-                          />
-                        </td>
-                        <td className="border-b border-[var(--surface-border)] px-6 py-4.5 text-sm text-[var(--muted-foreground)] whitespace-nowrap">
-                          {row.currentPlan ?? "—"}
-                        </td>
-                        <td className="border-b border-[var(--surface-border)] px-6 py-4.5 text-sm text-[var(--muted-foreground)]">
-                          <span className="font-mono text-[11px] opacity-80">
-                            {row.stripeCustomerId ?? "—"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <AdminAccountsTable rows={data.rows} />
             ) : (
               <div className="px-6 py-10 text-sm text-[var(--muted-foreground)]">
                 No garages matched the current search or filter.
@@ -251,40 +186,4 @@ function SummaryCard({
       </CardContent>
     </Card>
   );
-}
-
-function formatCompactDate(date: Date) {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(date);
-}
-
-function getTrialTone(label: string) {
-  if (label.includes("left")) {
-    return "info" as const;
-  }
-
-  if (label === "Expired") {
-    return "danger" as const;
-  }
-
-  return "default" as const;
-}
-
-function getSubscriptionTone(label: string) {
-  switch (label) {
-    case "Active":
-      return "success" as const;
-    case "Trial":
-      return "info" as const;
-    case "Past due":
-      return "warning" as const;
-    case "Cancelled":
-    case "Missing":
-      return "danger" as const;
-    default:
-      return "default" as const;
-  }
 }
