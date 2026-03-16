@@ -3,6 +3,7 @@ import { CustomerList } from "@/components/customers/customer-list";
 import { CustomerSearchForm } from "@/components/customers/customer-search-form";
 import { AppPage } from "@/components/layout/app-page";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { requireCurrentWorkshop } from "@/lib/workshop";
 import { getCustomersPageData } from "@/services/customers";
 
@@ -10,6 +11,7 @@ type CustomersPageProps = {
   searchParams?: Promise<{
     q?: string;
     customerId?: string;
+    newCustomer?: string;
   }>;
 };
 
@@ -18,6 +20,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
   const resolvedSearchParams = await searchParams;
   const query = resolvedSearchParams?.q ?? "";
   const customerId = resolvedSearchParams?.customerId;
+  const newCustomer = resolvedSearchParams?.newCustomer === "1";
 
   const data = await getCustomersPageData({
     workshopId: tenant.workshopId,
@@ -32,8 +35,10 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
           <div className="min-w-0 flex-1">
             <CustomerSearchForm defaultValue={data.query} />
           </div>
-          <Button type="button" variant="outline" disabled>
-            New customer
+          <Button asChild type="button">
+            <Link href={query ? `/customers?q=${encodeURIComponent(query)}&newCustomer=1` : "/customers?newCustomer=1"}>
+              New customer
+            </Link>
           </Button>
         </div>
 
@@ -44,7 +49,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
         />
       </section>
 
-      <CustomerDetailDialog customer={data.selectedCustomer} />
+      <CustomerDetailDialog customer={data.selectedCustomer} createMode={newCustomer} />
     </AppPage>
   );
 }

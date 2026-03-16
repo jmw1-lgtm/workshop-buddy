@@ -87,7 +87,14 @@ export async function getCustomersPageData({
               registration: true,
               make: true,
               model: true,
+              fuel: true,
+              engineSizeCc: true,
               year: true,
+              _count: {
+                select: {
+                  jobs: true,
+                },
+              },
             },
           },
           jobs: {
