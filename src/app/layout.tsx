@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics } from "@vercel/analytics/react";
 
 import { CookieConsentBanner } from "@/components/compliance/cookie-consent-banner";
 import { validateServerEnv } from "@/lib/env";
@@ -27,6 +28,7 @@ export default function RootLayout({
         <ClerkProvider>
           {children}
           <CookieConsentBanner />
+          <Analytics />
         </ClerkProvider>
       </body>
     </html>
