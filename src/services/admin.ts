@@ -11,6 +11,7 @@ export type AdminAccountRow = {
   workshopName: string;
   ownerEmail: string | null;
   createdAt: Date;
+  jobsCreatedCount: number;
   trialLabel: string;
   trialEndsAt: Date | null;
   subscriptionStatus: string;
@@ -117,6 +118,11 @@ export async function getAdminDashboardData(input?: {
         },
       },
       subscription: true,
+      _count: {
+        select: {
+          jobs: true,
+        },
+      },
     },
   });
 
@@ -172,6 +178,7 @@ export async function getAdminDashboardData(input?: {
       workshopName: workshop.name,
       ownerEmail,
       createdAt: workshop.createdAt,
+      jobsCreatedCount: workshop._count.jobs,
       trialLabel: getTrialLabel(workshop.subscription),
       trialEndsAt: workshop.subscription?.trialEndsAt ?? null,
       subscriptionStatus: getSubscriptionStatusLabel(workshop.subscription),

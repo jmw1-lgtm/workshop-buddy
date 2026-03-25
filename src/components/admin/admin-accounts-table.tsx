@@ -19,6 +19,7 @@ export function AdminAccountsTable({ rows }: { rows: AdminAccountRow[] }) {
               "Garage / account",
               "Owner email",
               "Created",
+              "Jobs created",
               "Trial status",
               "Trial end date",
               "Subscription status",
@@ -59,6 +60,9 @@ export function AdminAccountsTable({ rows }: { rows: AdminAccountRow[] }) {
                 </td>
                 <td className="whitespace-nowrap border-b border-[var(--surface-border)] px-4 py-3.5 text-sm text-[var(--muted-foreground)]">
                   {formatCompactDate(row.createdAt)}
+                </td>
+                <td className="whitespace-nowrap border-b border-[var(--surface-border)] px-4 py-3.5 text-sm font-medium text-[var(--foreground)]">
+                  {row.jobsCreatedCount}
                 </td>
                 <td className="whitespace-nowrap border-b border-[var(--surface-border)] px-4 py-3.5">
                   <AdminStatusBadge tone={getTrialTone(row.trialLabel)} label={row.trialLabel} />
