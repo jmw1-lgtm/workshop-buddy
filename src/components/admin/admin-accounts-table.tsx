@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { AdminAccountActions } from "@/components/admin/admin-account-actions";
 import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
+import { MaterialIcon } from "@/components/layout/material-icon";
 import { cn } from "@/lib/utils";
 import type { AdminAccountRow } from "@/services/admin";
 
@@ -62,7 +63,16 @@ export function AdminAccountsTable({ rows }: { rows: AdminAccountRow[] }) {
                   {formatCompactDate(row.createdAt)}
                 </td>
                 <td className="whitespace-nowrap border-b border-[var(--surface-border)] px-4 py-3.5 text-sm font-medium text-[var(--foreground)]">
-                  {row.jobsCreatedCount}
+                  <div className="flex items-center gap-2">
+                    <span>{row.jobsCreatedCount}</span>
+                    <span
+                      className="inline-flex cursor-help items-center text-[var(--muted-foreground)]"
+                      title={getActivityTooltip(row)}
+                      aria-label={getActivityTooltip(row)}
+                    >
+                      <MaterialIcon name="info" className="text-[16px]" />
+                    </span>
+                  </div>
                 </td>
                 <td className="whitespace-nowrap border-b border-[var(--surface-border)] px-4 py-3.5">
                   <AdminStatusBadge tone={getTrialTone(row.trialLabel)} label={row.trialLabel} />
@@ -113,6 +123,25 @@ export function AdminAccountsTable({ rows }: { rows: AdminAccountRow[] }) {
 }
 
 function formatCompactDate(date: Date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+
+function getActivityTooltip(row: AdminAccountRow) {
+  return [
+    `Last job created: ${formatActivityDate(row.lastJobCreatedAt)}`,
+    `Last customer created: ${formatActivityDate(row.lastCustomerCreatedAt)}`,
+  ].join("\n");
+}
+
+function formatActivityDate(date: Date | null) {
+  if (!date) {
+    return "No activity yet";
+  }
+
   return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "short",
