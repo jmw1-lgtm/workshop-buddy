@@ -284,7 +284,7 @@ export function MarketingHomePage() {
       <section id="product-preview" className="mx-auto max-w-7xl px-6 py-[4.5rem] sm:py-20">
         <SectionIntro
           eyebrow="Workshop diary"
-          title="A simple diary built for busy workshops"
+          title="Easy to use Diary for your workshop"
           description="See the day clearly, move jobs quickly, and keep the front desk organised."
         />
 
