@@ -11,6 +11,7 @@ import "./globals.css";
 validateServerEnv();
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://workshopbuddy.co.uk"),
   title: {
     default: "Workshop Buddy",
     template: "%s | Workshop Buddy",

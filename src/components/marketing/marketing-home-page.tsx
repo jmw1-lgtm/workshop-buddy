@@ -5,6 +5,7 @@ import { MaterialIcon } from "@/components/layout/material-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { marketingLandingPages } from "@/lib/marketing-pages";
 
 const featureCards = [
   {
@@ -499,6 +500,32 @@ export function MarketingHomePage() {
               </Card>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-[4.5rem] sm:py-20">
+        <SectionIntro
+          eyebrow="Software guides"
+          title="Explore software pages for specific garage workflows"
+          description="Read focused pages on scheduling, job cards, booking diaries, and broader garage management software for independent workshops."
+        />
+
+        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {marketingLandingPages.map((page) => (
+            <Card key={page.href} className="border-[var(--primary-pale)]/70 bg-[var(--background)]/92">
+              <CardHeader className="p-6">
+                <CardTitle className="text-xl">{page.title}</CardTitle>
+                <CardDescription className="text-sm leading-6">
+                  {page.description}
+                </CardDescription>
+                <div className="pt-2">
+                  <Button variant="outline" asChild>
+                    <Link href={page.href}>Read more</Link>
+                  </Button>
+                </div>
+              </CardHeader>
+            </Card>
+          ))}
         </div>
       </section>
 
