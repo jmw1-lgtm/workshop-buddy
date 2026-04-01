@@ -505,9 +505,9 @@ export function MarketingHomePage() {
 
       <section className="mx-auto max-w-7xl px-6 py-[4.5rem] sm:py-20">
         <SectionIntro
-          eyebrow="Software guides"
-          title="Explore software pages for specific garage workflows"
-          description="Read focused pages on scheduling, job cards, booking diaries, and broader garage management software for independent workshops."
+          eyebrow="Explore by workflow"
+          title="Find the right Workshop Buddy page for the way your garage works"
+          description="Browse focused pages on garage management, workshop scheduling, job cards, and digital booking diaries for independent workshops."
         />
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -520,7 +520,7 @@ export function MarketingHomePage() {
                 </CardDescription>
                 <div className="pt-2">
                   <Button variant="outline" asChild>
-                    <Link href={page.href}>Read more</Link>
+                    <Link href={page.href}>Explore this page</Link>
                   </Button>
                 </div>
               </CardHeader>

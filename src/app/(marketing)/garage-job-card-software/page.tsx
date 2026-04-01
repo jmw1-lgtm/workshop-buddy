@@ -23,8 +23,16 @@ export default function GarageJobCardSoftwarePage() {
       <SeoLandingPage
         pageTitle="Garage job card software"
         eyebrow="Job card software for workshop teams"
-        intro="Workshop Buddy helps independent garages create clear job cards, keep the right customer and vehicle details attached to each job, and stay organised from booking through collection."
-        supportingText="The job card is part of the daily workflow, not a separate admin document. That means the booking, vehicle, customer details, notes, and printable worksheet all stay connected to the same job."
+        intro="Garage job card software should keep the job details clear for both reception and the workshop. Workshop Buddy helps independent garages create printable job cards that stay linked to the booking, customer, and vehicle record."
+        supportingText="This page focuses on job organisation and workshop paperwork: keeping the work details in one place, printing when needed, and avoiding separate handwritten sheets that get lost or duplicated."
+        heroImageSrc="/screenshots/job-card2.png"
+        heroImageAlt="Workshop Buddy garage job card software screenshot"
+        heroBulletPoints={[
+          "Create clear printable job cards",
+          "Keep customer and vehicle details with each job",
+          "Add notes and track the job through the workflow",
+          "Open the job card directly from the diary",
+        ]}
         benefits={[
           {
             title: "Keep jobs clear",
@@ -47,6 +55,7 @@ export default function GarageJobCardSoftwarePage() {
             icon: "folder_managed",
           },
         ]}
+        benefitsIntro="This page is about job cards specifically: clearer paperwork, fewer missing details, and a smoother link between reception and the workshop floor."
         features={[
           {
             title: "Printable job cards",
@@ -69,6 +78,9 @@ export default function GarageJobCardSoftwarePage() {
             icon: "sticky_note_2",
           },
         ]}
+        workflowEyebrow="Job card workflow"
+        workflowTitle="Capture the job once, then keep it organised"
+        workflowDescription="The booking and the job card stay part of the same workflow, which reduces rekeying and keeps the paperwork consistent."
         workflowSteps={[
           {
             title: "Create the booking",
@@ -83,6 +95,9 @@ export default function GarageJobCardSoftwarePage() {
             description: "Produce a printable worksheet while keeping the same job card available digitally for reception.",
           },
         ]}
+        screensEyebrow="Job card view"
+        screensTitle="The parts of Workshop Buddy that keep workshop paperwork tidy"
+        screensDescription="These screens are the most relevant ones for garages comparing printable job card software."
         screens={[
           {
             title: "Job card view",
@@ -97,11 +112,15 @@ export default function GarageJobCardSoftwarePage() {
             imageAlt: "Workshop Buddy customer records screenshot",
           },
         ]}
+        whoItsForTitle="Useful for workshops that still rely on paper job sheets"
+        whoItsForDescription="This page is most relevant for garages that want printable job cards but also want the front desk to stay organised digitally."
         whoItsFor={[
           "Independent garages that still rely on printed worksheets but want the front desk to stay digital and organised.",
           "Workshops that want job cards tied directly to the booking, customer, and vehicle details.",
           "Garage teams looking for a simpler, more practical alternative to loose paper job sheets and handwritten notes.",
         ]}
+        faqTitle="Questions about garage job card software"
+        faqDescription="These answers focus on printable job cards, linked records, and how the job card fits into the existing Workshop Buddy workflow."
         faqs={[
           {
             question: "Can Workshop Buddy print job cards?",
@@ -124,6 +143,36 @@ export default function GarageJobCardSoftwarePage() {
               "Yes. The diary and job card are part of the same workflow, so reception can open the job directly from the booking.",
           },
         ]}
+        ctaTitle="Start a free trial and tidy up workshop job paperwork"
+        ctaDescription="Give reception and technicians a clearer job-card workflow without losing the option to print worksheets."
+        ctaSecondaryLabel="See the diary workflow"
+        ctaSecondaryHref="/garage-booking-diary-software"
+        primaryCtaLabel="Start free job card software trial"
+        relatedPagesTitle="Related pages for job card and diary workflows"
+        relatedPagesDescription="If you are comparing job-card tools with scheduling and diary tools, these pages show how the pieces fit together."
+        relatedPages={[
+          {
+            href: "/garage-booking-diary-software",
+            title: "Garage booking diary software",
+            description: "See the diary side of the workflow that feeds jobs directly into the job card.",
+            ctaLabel: "Read booking diary page",
+          },
+          {
+            href: "/workshop-scheduling-software",
+            title: "Workshop scheduling software",
+            description: "See how bookings are scheduled and rescheduled before the job card is worked on.",
+            ctaLabel: "Read scheduling page",
+          },
+          {
+            href: "/garage-management-software",
+            title: "Garage management software",
+            description: "Return to the broader garage software page covering records, diary management, and job cards together.",
+            ctaLabel: "Read garage software page",
+          },
+        ]}
+        homepageCardTitle="See the full Workshop Buddy overview"
+        homepageCardDescription="Go back to the main marketing page for the wider product view, pricing, and screenshots."
+        homepageCardCtaLabel="Visit homepage"
       />
       <SiteFooter />
     </div>

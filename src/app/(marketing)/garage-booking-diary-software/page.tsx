@@ -23,8 +23,16 @@ export default function GarageBookingDiarySoftwarePage() {
       <SeoLandingPage
         pageTitle="Garage booking diary software"
         eyebrow="Digital diary software for garages"
-        intro="Workshop Buddy replaces the paper booking diary with a digital workshop view that helps independent garages see booked work clearly and keep the day under control."
-        supportingText="Instead of relying on handwritten slots, rubbed-out notes, or separate customer files, the diary keeps each booking connected to the customer, vehicle, and job card so the workflow stays tidy."
+        intro="Garage booking diary software should make it easier to see the day, fit work into the workshop, and keep bookings accurate as things move around. Workshop Buddy replaces the paper diary with a digital booking view built for independent garages."
+        supportingText="This page focuses on the diary itself: clearer daily visibility, easier updates, and a booking view that stays connected to the rest of the job information."
+        heroImageSrc="/screenshots/diary-main-week-tab2.png"
+        heroImageAlt="Workshop Buddy garage booking diary software screenshot"
+        heroBulletPoints={[
+          "Replace the handwritten workshop diary",
+          "See scheduled jobs in a clear digital view",
+          "Update bookings without crossed-out notes",
+          "Open customer, vehicle, and job details from the diary",
+        ]}
         benefits={[
           {
             title: "Replace the paper diary",
@@ -47,6 +55,7 @@ export default function GarageBookingDiarySoftwarePage() {
             icon: "touch_app",
           },
         ]}
+        benefitsIntro="This page is focused on the diary experience: a cleaner way to book and track the workshop day than a paper diary or wall planner."
         features={[
           {
             title: "Clear workshop diary view",
@@ -69,6 +78,9 @@ export default function GarageBookingDiarySoftwarePage() {
             icon: "hub",
           },
         ]}
+        workflowEyebrow="Diary workflow"
+        workflowTitle="Book it, update it, and keep the day accurate"
+        workflowDescription="The diary is built to stay usable under real workshop conditions, where bookings move and reception needs fast answers."
         workflowSteps={[
           {
             title: "Book the job into the diary",
@@ -83,6 +95,9 @@ export default function GarageBookingDiarySoftwarePage() {
             description: "Move from the booking diary to the job card, customer record, or vehicle record without hunting through separate systems.",
           },
         ]}
+        screensEyebrow="Diary screens"
+        screensTitle="Views that replace the traditional garage booking diary"
+        screensDescription="These screens are the most relevant ones for workshops researching digital diary software rather than broader management software."
         screens={[
           {
             title: "Digital booking diary",
@@ -97,11 +112,15 @@ export default function GarageBookingDiarySoftwarePage() {
             imageAlt: "Workshop Buddy daily diary screenshot",
           },
         ]}
+        whoItsForTitle="Best for garages moving away from a handwritten booking book"
+        whoItsForDescription="This page is most relevant for workshops where the diary is still the centre of daily organisation and needs a cleaner digital replacement."
         whoItsFor={[
           "Independent garages that still book work in a paper diary and want a digital replacement that stays simple.",
           "Reception teams that need a clearer view of daily bookings, arrivals, and changes during a busy workshop day.",
           "Vehicle workshops that want the diary connected to customer, vehicle, and job-card information rather than sitting on its own.",
         ]}
+        faqTitle="Questions about garage booking diary software"
+        faqDescription="These answers focus on replacing the paper diary while keeping the booking linked to the rest of the workshop workflow."
         faqs={[
           {
             question: "Does Workshop Buddy replace a paper workshop diary?",
@@ -124,6 +143,36 @@ export default function GarageBookingDiarySoftwarePage() {
               "It is aimed at small independent garages and vehicle workshops that want a straightforward booking diary and daily operations system.",
           },
         ]}
+        ctaTitle="Start a free trial and replace the paper booking diary"
+        ctaDescription="Give reception a clearer digital diary for daily workshop bookings, changes, and linked job information."
+        ctaSecondaryLabel="Compare scheduling software"
+        ctaSecondaryHref="/workshop-scheduling-software"
+        primaryCtaLabel="Start free booking diary trial"
+        relatedPagesTitle="Related pages for diary and scheduling software"
+        relatedPagesDescription="If you are comparing a digital booking diary with broader scheduling and job-card tools, these pages cover the connected workflows."
+        relatedPages={[
+          {
+            href: "/workshop-scheduling-software",
+            title: "Workshop scheduling software",
+            description: "See the scheduling-focused page for capacity, rescheduling, and booking visibility.",
+            ctaLabel: "Read scheduling software page",
+          },
+          {
+            href: "/garage-job-card-software",
+            title: "Garage job card software",
+            description: "See how bookings in the diary connect directly to printable job cards and workshop notes.",
+            ctaLabel: "Read job card software page",
+          },
+          {
+            href: "/garage-management-software",
+            title: "Garage management software",
+            description: "Return to the broader product page covering diary bookings, records, and job cards together.",
+            ctaLabel: "Read garage software page",
+          },
+        ]}
+        homepageCardTitle="See the main Workshop Buddy product page"
+        homepageCardDescription="Return to the homepage for the broader product overview, pricing, and screenshots."
+        homepageCardCtaLabel="Visit main page"
       />
       <SiteFooter />
     </div>

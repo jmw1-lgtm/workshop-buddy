@@ -5,7 +5,6 @@ import { MaterialIcon } from "@/components/layout/material-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { marketingLandingPages } from "@/lib/marketing-pages";
 
 type IconName = string;
 
@@ -23,6 +22,13 @@ type LandingFaq = {
 type LandingStep = {
   title: string;
   description: string;
+};
+
+type RelatedPage = {
+  href: string;
+  title: string;
+  description: string;
+  ctaLabel: string;
 };
 
 type LandingScreen = {
@@ -43,6 +49,30 @@ type SeoLandingPageProps = {
   workflowSteps: LandingStep[];
   screens: LandingScreen[];
   faqs: LandingFaq[];
+  heroImageSrc?: string;
+  heroImageAlt?: string;
+  heroBulletPoints?: string[];
+  benefitsIntro: string;
+  workflowEyebrow: string;
+  workflowTitle: string;
+  workflowDescription: string;
+  screensEyebrow: string;
+  screensTitle: string;
+  screensDescription: string;
+  whoItsForTitle: string;
+  whoItsForDescription: string;
+  faqTitle: string;
+  faqDescription: string;
+  ctaTitle: string;
+  ctaDescription: string;
+  ctaSecondaryLabel?: string;
+  ctaSecondaryHref?: string;
+  relatedPagesTitle: string;
+  relatedPagesDescription: string;
+  relatedPages: RelatedPage[];
+  homepageCardTitle?: string;
+  homepageCardDescription?: string;
+  homepageCardCtaLabel?: string;
   primaryCtaLabel?: string;
 };
 
@@ -95,9 +125,32 @@ export function SeoLandingPage({
   workflowSteps,
   screens,
   faqs,
+  heroImageSrc = "/screenshots/diary-main-week-tab2.png",
+  heroImageAlt = "Workshop Buddy diary view screenshot",
+  heroBulletPoints = [],
+  benefitsIntro,
+  workflowEyebrow,
+  workflowTitle,
+  workflowDescription,
+  screensEyebrow,
+  screensTitle,
+  screensDescription,
+  whoItsForTitle,
+  whoItsForDescription,
+  faqTitle,
+  faqDescription,
+  ctaTitle,
+  ctaDescription,
+  ctaSecondaryLabel = "View main homepage",
+  ctaSecondaryHref = "/",
+  relatedPagesTitle,
+  relatedPagesDescription,
+  relatedPages,
+  homepageCardTitle = "Workshop Buddy homepage",
+  homepageCardDescription = "See the full overview, pricing, screenshots, and the main conversion path.",
+  homepageCardCtaLabel = "Go to homepage",
   primaryCtaLabel = "Start free 14-day trial",
 }: SeoLandingPageProps) {
-  const relatedPages = marketingLandingPages.filter((page) => page.title !== pageTitle);
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -157,19 +210,35 @@ export function SeoLandingPage({
                   className="bg-[var(--background)]/78 text-[var(--foreground)]"
                   asChild
                 >
-                  <Link href="/">View main homepage</Link>
+                  <Link href={ctaSecondaryHref}>{ctaSecondaryLabel}</Link>
                 </Button>
               </div>
               <p className="pl-1 text-sm font-medium text-[var(--muted-foreground)]/90">
                 No credit card required • 14-day free trial • Cancel anytime
               </p>
             </div>
+
+            {heroBulletPoints.length ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {heroBulletPoints.map((point) => (
+                  <div
+                    key={point}
+                    className="flex items-start gap-3 rounded-[1.5rem] border border-[var(--primary-pale)]/70 bg-[var(--background)]/82 px-4 py-3 shadow-[0_10px_24px_rgba(39,76,119,0.05)]"
+                  >
+                    <div className="mt-0.5 flex size-6 items-center justify-center rounded-full bg-[rgba(163,206,241,0.4)]">
+                      <MaterialIcon name="check" className="text-[16px] text-[var(--primary)]" />
+                    </div>
+                    <p className="text-sm leading-6 text-[var(--foreground)]">{point}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </header>
 
           <div className="relative z-10 rounded-[2rem] border border-[var(--primary-pale)]/70 bg-[rgba(231,236,239,0.86)] p-5 shadow-[0_20px_44px_rgba(39,76,119,0.08)] sm:p-6">
             <Image
-              src="/screenshots/diary-main-week-tab2.png"
-              alt="Workshop Buddy diary view screenshot"
+              src={heroImageSrc}
+              alt={heroImageAlt}
               width={1600}
               height={1040}
               priority
@@ -202,7 +271,7 @@ export function SeoLandingPage({
         <SectionIntro
           eyebrow="Benefits"
           title={`Why independent garages choose ${pageTitle.toLowerCase()}`}
-          description="Keep the workflow practical, visible, and easy to manage for a busy reception desk."
+          description={benefitsIntro}
         />
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -235,9 +304,9 @@ export function SeoLandingPage({
       >
         <div className="mx-auto max-w-7xl px-6 py-[4.5rem] sm:py-20">
           <SectionIntro
-            eyebrow="Relevant features"
-            title="Built around the way vehicle workshops run the day"
-            description="The workflow stays simple: book the work, run the diary, and keep customer and vehicle details tied to each job."
+            eyebrow={workflowEyebrow}
+            title={workflowTitle}
+            description={workflowDescription}
           />
 
           <div className="mt-8 grid gap-4 lg:grid-cols-3">
@@ -260,9 +329,9 @@ export function SeoLandingPage({
 
       <section className="mx-auto max-w-7xl px-6 py-[4.5rem] sm:py-20">
         <SectionIntro
-          eyebrow="Used every day"
-          title="Screens that help the front desk stay organised"
-          description="These are the parts of Workshop Buddy used most often by reception teams in independent garages."
+          eyebrow={screensEyebrow}
+          title={screensTitle}
+          description={screensDescription}
         />
 
         <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -277,8 +346,8 @@ export function SeoLandingPage({
           <div>
             <SectionIntro
               eyebrow="Who it's for"
-              title="A practical fit for small workshop teams"
-              description="Workshop Buddy is designed for garages that want simpler daily organisation, not a heavyweight dealership system."
+              title={whoItsForTitle}
+              description={whoItsForDescription}
             />
           </div>
 
@@ -301,8 +370,8 @@ export function SeoLandingPage({
       <section id="faq" className="mx-auto max-w-6xl px-6 py-[4.5rem] sm:py-20">
         <SectionIntro
           eyebrow="FAQ"
-          title={`Common questions about ${pageTitle.toLowerCase()}`}
-          description="Short, practical answers for workshops comparing options and looking for a simpler way to run the day."
+          title={faqTitle}
+          description={faqDescription}
         />
 
         <div className="mt-8 grid gap-3.5">
@@ -322,10 +391,10 @@ export function SeoLandingPage({
           <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
             <div className="space-y-4">
               <h2 className="max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
-                Start with a 14-day free trial and keep the workshop day clearer.
+                {ctaTitle}
               </h2>
               <p className="max-w-2xl text-base leading-7 text-[var(--background)]/78 sm:text-lg">
-                Workshop Buddy keeps bookings, customers, vehicles, and job cards together in one simple workflow for independent garages.
+                {ctaDescription}
               </p>
               <p className="text-sm font-medium text-[var(--background)]/78">
                 Pricing starts at £49 per month or £490 per year per workshop.
@@ -342,7 +411,7 @@ export function SeoLandingPage({
                 className="border-white/35 bg-transparent text-[var(--background)] hover:bg-white/10 hover:text-[var(--background)]"
                 asChild
               >
-                <Link href="/">See pricing on homepage</Link>
+                <Link href={ctaSecondaryHref}>{ctaSecondaryLabel}</Link>
               </Button>
             </div>
           </div>
@@ -353,20 +422,20 @@ export function SeoLandingPage({
         <div className="mx-auto max-w-7xl px-6 py-[4.5rem] sm:py-16">
           <SectionIntro
             eyebrow="Related pages"
-            title="Explore more Workshop Buddy software pages"
-            description="Use these pages to compare the diary, scheduling, and job card parts of the product in more detail."
+            title={relatedPagesTitle}
+            description={relatedPagesDescription}
           />
 
           <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <Card className="border-[var(--primary-pale)]/70 bg-[var(--background)]/92">
               <CardHeader className="p-6">
-                <CardTitle className="text-xl">Workshop Buddy homepage</CardTitle>
+                <CardTitle className="text-xl">{homepageCardTitle}</CardTitle>
                 <CardDescription className="text-sm leading-6">
-                  See the full overview, pricing, screenshots, and the main conversion path.
+                  {homepageCardDescription}
                 </CardDescription>
                 <div className="pt-2">
                   <Button variant="outline" asChild>
-                    <Link href="/">Go to homepage</Link>
+                    <Link href="/">{homepageCardCtaLabel}</Link>
                   </Button>
                 </div>
               </CardHeader>
@@ -381,7 +450,7 @@ export function SeoLandingPage({
                   </CardDescription>
                   <div className="pt-2">
                     <Button variant="outline" asChild>
-                      <Link href={page.href}>Read this page</Link>
+                      <Link href={page.href}>{page.ctaLabel}</Link>
                     </Button>
                   </div>
                 </CardHeader>

@@ -29,11 +29,11 @@ export function SiteFooter() {
         <div className="grid gap-8 sm:grid-cols-2">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--sidebar-foreground)]/85">
-              Explore
+              Software pages
             </p>
             <div className="mt-4 grid gap-3 text-sm text-[var(--sidebar-muted)]">
               <Link href="/" className="transition-colors hover:text-[var(--sidebar-foreground)]">
-                Homepage
+                Workshop Buddy overview
               </Link>
               {marketingLandingPages.map((page) => (
                 <Link
