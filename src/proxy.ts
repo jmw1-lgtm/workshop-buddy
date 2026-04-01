@@ -1,9 +1,17 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isPublicRoute = createRouteMatcher([
+import { marketingLandingPages } from "@/lib/marketing-pages";
+
+const publicPageRoutes = [
   "/",
   "/terms",
   "/privacy",
+  ...marketingLandingPages.map((page) => page.href),
+];
+
+const isPublicRoute = createRouteMatcher([
+  // Public marketing pages stay accessible without auth.
+  ...publicPageRoutes,
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/stripe/webhook",
