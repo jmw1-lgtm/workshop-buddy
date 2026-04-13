@@ -19,6 +19,8 @@ type VehicleLookupFieldsProps = {
   };
   allowManualEntry?: boolean;
   onVehicleChange?: (vehicle: VehicleFormState) => void;
+  withFormNames?: boolean;
+  idPrefix?: string;
 };
 
 type VehicleFormState = {
@@ -47,6 +49,8 @@ export function VehicleLookupFields({
   initialVehicle,
   allowManualEntry = true,
   onVehicleChange,
+  withFormNames = true,
+  idPrefix = "",
 }: VehicleLookupFieldsProps) {
   const initialRegistration = initialVehicle?.registration ?? null;
   const initialMake = initialVehicle?.make ?? null;
@@ -176,11 +180,11 @@ export function VehicleLookupFields({
   return (
     <div className="grid gap-4">
       <div className="grid gap-2">
-        <Label htmlFor="registration">Registration</Label>
+        <Label htmlFor={buildFieldId(idPrefix, "registration")}>Registration</Label>
         <div className="flex gap-2">
           <Input
-            id="registration"
-            name="registration"
+            id={buildFieldId(idPrefix, "registration")}
+            name={withFormNames ? "registration" : undefined}
             placeholder="AB12 CDE"
             value={vehicle.registration}
             onChange={(event) => {
@@ -211,8 +215,8 @@ export function VehicleLookupFields({
       {allowManualEntry ? (
         <div className="grid gap-4 rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-muted)]/35 p-4 sm:grid-cols-2">
           <EditableField
-            id="make"
-            name="make"
+            id={buildFieldId(idPrefix, "make")}
+            name={withFormNames ? "make" : undefined}
             label="Make"
             value={vehicle.make}
             placeholder="Ford"
@@ -224,8 +228,8 @@ export function VehicleLookupFields({
             }
           />
           <EditableField
-            id="model"
-            name="model"
+            id={buildFieldId(idPrefix, "model")}
+            name={withFormNames ? "model" : undefined}
             label="Model"
             value={vehicle.model}
             placeholder="Transit Custom"
@@ -237,8 +241,8 @@ export function VehicleLookupFields({
             }
           />
           <EditableField
-            id="fuel"
-            name="fuel"
+            id={buildFieldId(idPrefix, "fuel")}
+            name={withFormNames ? "fuel" : undefined}
             label="Fuel type"
             value={vehicle.fuel}
             placeholder="Diesel"
@@ -250,8 +254,8 @@ export function VehicleLookupFields({
             }
           />
           <EditableField
-            id="year"
-            name="year"
+            id={buildFieldId(idPrefix, "year")}
+            name={withFormNames ? "year" : undefined}
             label="Year"
             value={vehicle.year}
             placeholder="2021"
@@ -264,8 +268,8 @@ export function VehicleLookupFields({
             }
           />
           <EditableField
-            id="engineSizeCc"
-            name="engineSizeCc"
+            id={buildFieldId(idPrefix, "engineSizeCc")}
+            name={withFormNames ? "engineSizeCc" : undefined}
             label="Engine size (cc)"
             value={vehicle.engineSizeCc}
             placeholder="1996"
@@ -303,6 +307,10 @@ export function VehicleLookupFields({
   );
 }
 
+function buildFieldId(prefix: string, id: string) {
+  return prefix ? `${prefix}-${id}` : id;
+}
+
 function areVehicleStatesEqual(left: VehicleFormState, right: VehicleFormState) {
   return (
     left.registration === right.registration &&
@@ -324,7 +332,7 @@ function EditableField({
   inputMode,
 }: {
   id: string;
-  name: string;
+  name?: string;
   label: string;
   value: string;
   placeholder: string;

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/db/prisma";
+import { buildPrimaryJobLineItem } from "@/lib/job-line-items";
 import { getCurrentWorkshopId, requireCurrentWorkshop } from "@/lib/workshop";
 import {
   JOB_STATUSES,
@@ -100,6 +101,18 @@ export async function createDiaryJob(
           scheduledStart,
           durationMins,
           notes: notes || null,
+          lineItems: {
+            create: [
+              {
+                workshopId,
+                ...buildPrimaryJobLineItem({
+                  jobTypeName: jobType.name,
+                  notes,
+                }),
+                position: 0,
+              },
+            ],
+          },
         },
       });
     });

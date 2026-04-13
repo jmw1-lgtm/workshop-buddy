@@ -13,12 +13,20 @@ import { PrintJobCardButton } from "@/components/jobs/print-job-card-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { VehicleLookupFields } from "@/components/vehicles/vehicle-lookup-fields";
+import { buildPrimaryJobLineItem, ensurePrimaryJobLineItems } from "@/lib/job-line-items";
 import { jobStatusLabels } from "@/lib/job-status";
 import { cn } from "@/lib/utils";
 import type { JobCardData } from "@/services/jobs";
@@ -66,7 +74,13 @@ type EditableLineItem = {
   unitPrice: string;
 };
 
-type VehicleSummaryState = {
+type CustomerFields = {
+  name: string;
+  phone: string;
+  email: string;
+};
+
+type VehicleFields = {
   registration: string;
   make: string;
   model: string;
@@ -75,13 +89,23 @@ type VehicleSummaryState = {
   engineSizeCc: string;
 };
 
+type JobFields = {
+  jobTypeId: string;
+  status: JobStatus;
+  scheduledDate: string;
+  scheduledTime: string;
+  durationMins: string;
+};
+
+type EditorModal = "customer" | "vehicle" | "job" | null;
+
 function SaveButton({ form }: { form?: string }) {
   const { pending } = useFormStatus();
 
   return (
     <Button type="submit" form={form} disabled={pending}>
       <MaterialIcon name={pending ? "hourglass_top" : "save"} className="text-[18px]" />
-      {pending ? "Saving..." : "Save Job Card"}
+      {pending ? "Saving..." : "Save"}
     </Button>
   );
 }
@@ -99,6 +123,35 @@ function toTimeInputValue(date: Date) {
   const minutes = `${date.getMinutes()}`.padStart(2, "0");
 
   return `${hours}:${minutes}`;
+}
+
+function toCustomerFields(job: JobCardData): CustomerFields {
+  return {
+    name: job.customer.name,
+    phone: job.customer.phone ?? "",
+    email: job.customer.email ?? "",
+  };
+}
+
+function toVehicleFields(job: JobCardData): VehicleFields {
+  return {
+    registration: job.vehicle.registration,
+    make: job.vehicle.make ?? "",
+    model: job.vehicle.model ?? "",
+    fuel: job.vehicle.fuel ?? "",
+    year: job.vehicle.year ? `${job.vehicle.year}` : "",
+    engineSizeCc: job.vehicle.engineSizeCc ? `${job.vehicle.engineSizeCc}` : "",
+  };
+}
+
+function toJobFields(job: JobCardData): JobFields {
+  return {
+    jobTypeId: job.jobType.id,
+    status: job.status,
+    scheduledDate: toDateInputValue(job.scheduledStart),
+    scheduledTime: toTimeInputValue(job.scheduledStart),
+    durationMins: `${job.durationMins}`,
+  };
 }
 
 function formatCurrency(value: number) {
@@ -130,37 +183,6 @@ function formatEditableNumber(value: number) {
   return Number.isInteger(value) ? `${value}` : value.toFixed(2);
 }
 
-function toVehicleSummaryState(job: JobCardData): VehicleSummaryState {
-  return {
-    registration: job.vehicle.registration,
-    make: job.vehicle.make ?? "",
-    model: job.vehicle.model ?? "",
-    fuel: job.vehicle.fuel ?? "",
-    year: job.vehicle.year ? `${job.vehicle.year}` : "",
-    engineSizeCc: job.vehicle.engineSizeCc ? `${job.vehicle.engineSizeCc}` : "",
-  };
-}
-
-function toEditableLineItems(job: JobCardData): EditableLineItem[] {
-  return job.lineItems.map((lineItem) => ({
-    id: lineItem.id,
-    description: lineItem.description,
-    itemType: lineItem.itemType,
-    quantity: formatEditableNumber(lineItem.quantity),
-    unitPrice: formatEditableNumber(lineItem.unitPrice),
-  }));
-}
-
-function createBlankLineItem(): EditableLineItem {
-  return {
-    id: crypto.randomUUID(),
-    description: "",
-    itemType: "LABOUR",
-    quantity: "1",
-    unitPrice: "0.00",
-  };
-}
-
 function parseDisplayNumber(value: string) {
   const parsed = Number(value);
 
@@ -188,16 +210,52 @@ function getStatusBadgeVariant(status: JobStatus) {
   }
 }
 
+function createBlankLineItem(): EditableLineItem {
+  return {
+    id: crypto.randomUUID(),
+    description: "",
+    itemType: "LABOUR",
+    quantity: "1",
+    unitPrice: "0.00",
+  };
+}
+
+function toEditableLineItems(job: JobCardData): EditableLineItem[] {
+  const seededLineItems = ensurePrimaryJobLineItems(
+    job.lineItems.map((lineItem) => ({
+      id: lineItem.id,
+      description: lineItem.description,
+      itemType: lineItem.itemType,
+      quantity: formatEditableNumber(lineItem.quantity),
+      unitPrice: formatEditableNumber(lineItem.unitPrice),
+    })),
+    {
+      id: "seeded-primary-line-item",
+      ...buildPrimaryJobLineItem({
+        jobTypeName: job.jobType.name,
+        notes: job.notes,
+      }),
+      quantity: "1",
+      unitPrice: "0.00",
+    },
+  );
+
+  return seededLineItems;
+}
+
 export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
   const [state, formAction] = useActionState(updateJobCard, initialState);
-  const [vehicleSummary, setVehicleSummary] = useState<VehicleSummaryState>(() =>
-    toVehicleSummaryState(job),
-  );
+  const [activeEditor, setActiveEditor] = useState<EditorModal>(null);
+  const [customer, setCustomer] = useState<CustomerFields>(() => toCustomerFields(job));
+  const [vehicle, setVehicle] = useState<VehicleFields>(() => toVehicleFields(job));
+  const [jobFields, setJobFields] = useState<JobFields>(() => toJobFields(job));
   const [lineItems, setLineItems] = useState<EditableLineItem[]>(() => toEditableLineItems(job));
   const formId = "job-card-form";
 
   useEffect(() => {
-    setVehicleSummary(toVehicleSummaryState(job));
+    setCustomer(toCustomerFields(job));
+    setVehicle(toVehicleFields(job));
+    setJobFields(toJobFields(job));
     setLineItems(toEditableLineItems(job));
   }, [job]);
 
@@ -207,46 +265,55 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
   );
   const vatAmount = 0;
   const total = subtotal + vatAmount;
-  const vehicleHeadline = [vehicleSummary.make, vehicleSummary.model].filter(Boolean).join(" ");
-  const vehicleSpec = [vehicleSummary.year, vehicleSummary.fuel, formatEngineSize(vehicleSummary)]
+  const selectedJobType =
+    jobTypes.find((jobType) => jobType.id === jobFields.jobTypeId) ?? job.jobType;
+  const vehicleHeadline = [vehicle.make, vehicle.model].filter(Boolean).join(" ");
+  const vehicleSpec = [vehicle.year, vehicle.fuel, vehicle.engineSizeCc ? `${vehicle.engineSizeCc}cc` : ""]
     .filter(Boolean)
     .join(" • ");
-  const jobReference = `${job.jobNumber}`;
 
   return (
-    <form id={formId} action={formAction} className="grid gap-6 print:gap-4">
+    <form id={formId} action={formAction} className="grid gap-4 print:gap-3">
       <input type="hidden" name="jobId" value={job.id} />
+      <input type="hidden" name="customerName" value={customer.name} />
+      <input type="hidden" name="phone" value={customer.phone} />
+      <input type="hidden" name="customerEmail" value={customer.email} />
+      <input type="hidden" name="registration" value={vehicle.registration} />
+      <input type="hidden" name="make" value={vehicle.make} />
+      <input type="hidden" name="model" value={vehicle.model} />
+      <input type="hidden" name="fuel" value={vehicle.fuel} />
+      <input type="hidden" name="year" value={vehicle.year} />
+      <input type="hidden" name="engineSizeCc" value={vehicle.engineSizeCc} />
+      <input type="hidden" name="jobTypeId" value={jobFields.jobTypeId} />
+      <input type="hidden" name="status" value={jobFields.status} />
+      <input type="hidden" name="scheduledDate" value={jobFields.scheduledDate} />
+      <input type="hidden" name="scheduledTime" value={jobFields.scheduledTime} />
+      <input type="hidden" name="durationMins" value={jobFields.durationMins} />
 
       <Card className="overflow-hidden bg-white print:rounded-none print:border-0 print:shadow-none">
         <CardContent className="px-0 pb-0">
-          <div className="border-b border-[var(--surface-border)] bg-[linear-gradient(135deg,rgba(163,206,241,0.22),rgba(255,255,255,0.98))] px-6 py-5 print:bg-white print:px-0 print:py-4">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-4">
+          <section className="border-b border-[var(--surface-border)] bg-[linear-gradient(135deg,rgba(163,206,241,0.16),rgba(255,255,255,0.98))] px-5 py-4 print:bg-white print:px-0 print:py-3">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge className="tracking-[0.12em] uppercase">Job Card</Badge>
-                  <Badge variant={getStatusBadgeVariant(job.status)}>
-                    {jobStatusLabels[job.status]}
+                  <Badge className="tracking-[0.12em] uppercase">Work Order</Badge>
+                  <Badge variant={getStatusBadgeVariant(jobFields.status)}>
+                    {jobStatusLabels[jobFields.status]}
                   </Badge>
-                  <Badge variant="default">{job.jobType.name}</Badge>
+                  <Badge variant="default">{selectedJobType.name}</Badge>
                 </div>
-
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-end gap-3">
-                    <h1 className="text-3xl font-semibold tracking-tight text-[var(--foreground)] sm:text-4xl">
-                      Work Order #{jobReference}
-                    </h1>
-                    <p className="pb-1 text-sm font-medium uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
-                      {job.workshop.name}
-                    </p>
-                  </div>
-                  <div className="grid gap-2 text-sm text-[var(--muted-foreground)] sm:grid-cols-3">
-                    <HeaderMeta label="Scheduled" value={formatLongDate(job.scheduledStart)} />
-                    <HeaderMeta label="Time" value={formatTime(job.scheduledStart)} />
-                    <HeaderMeta
-                      label="Estimated duration"
-                      value={`${job.durationMins} mins`}
-                    />
-                  </div>
+                <div className="flex flex-wrap items-end gap-3">
+                  <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-3xl">
+                    Work Order #{job.jobNumber}
+                  </h1>
+                  <p className="pb-0.5 text-sm font-medium uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
+                    {job.workshop.name}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 text-sm">
+                  <HeaderPill label="Scheduled" value={formatLongDate(job.scheduledStart)} />
+                  <HeaderPill label="Time" value={formatTime(job.scheduledStart)} />
+                  <HeaderPill label="Duration" value={`${jobFields.durationMins} mins`} />
                 </div>
               </div>
 
@@ -255,373 +322,131 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
                 <PrintJobCardButton />
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="px-6 py-6 print:px-0 print:py-4">
-            <div className="grid gap-4 lg:grid-cols-2">
-              <DocumentCard
-                title="Customer details"
-                description="Primary contact for this job."
-                className="print:border print:shadow-none"
-              >
-                <div className="grid gap-4">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <FieldGroup>
-                      <Label htmlFor="customerName">Name</Label>
-                      <Input
-                        id="customerName"
-                        name="customerName"
-                        defaultValue={job.customer.name}
-                        required
-                      />
-                    </FieldGroup>
-                    <FieldGroup>
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        defaultValue={job.customer.phone ?? ""}
-                        placeholder="Required"
-                        required
-                      />
-                    </FieldGroup>
-                  </div>
+          <div className="px-5 py-4 print:px-0 print:py-3">
+            <section className="grid gap-3 lg:grid-cols-3">
+              <SummaryCard
+                title="Customer"
+                icon="person"
+                onEdit={() => setActiveEditor("customer")}
+                lines={[
+                  customer.name || "No customer name",
+                  customer.phone || "Phone not recorded",
+                  customer.email || "Email not recorded",
+                ]}
+              />
+              <SummaryCard
+                title="Vehicle"
+                icon="directions_car"
+                onEdit={() => setActiveEditor("vehicle")}
+                registration={vehicle.registration}
+                lines={[
+                  vehicleHeadline || "Vehicle details pending",
+                  vehicleSpec || "Fuel, year and engine can be added in the editor",
+                ]}
+              />
+              <SummaryCard
+                title="Job"
+                icon="event_note"
+                onEdit={() => setActiveEditor("job")}
+                lines={[
+                  selectedJobType.name,
+                  jobStatusLabels[jobFields.status],
+                  `${jobFields.scheduledDate} • ${jobFields.scheduledTime} • ${jobFields.durationMins} mins`,
+                ]}
+              />
+            </section>
+
+            <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_290px]">
+              <div className="space-y-4">
+                <DocumentCard
+                  title="Work requested"
+                  description="Keep the booking reason visible while building the work order."
+                >
                   <FieldGroup>
-                    <Label htmlFor="customerEmail">Email</Label>
-                    <Input
-                      id="customerEmail"
-                      name="customerEmail"
-                      type="email"
-                      defaultValue={job.customer.email ?? ""}
-                      placeholder="Optional"
-                    />
-                  </FieldGroup>
-                  <div className="grid gap-3 rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-muted)]/25 p-4">
-                    <SummaryRow label="Customer" value={job.customer.name} />
-                    <SummaryRow label="Phone" value={job.customer.phone ?? "Not recorded"} />
-                    <SummaryRow label="Email" value={job.customer.email ?? "Not recorded"} />
-                  </div>
-                </div>
-              </DocumentCard>
-
-              <DocumentCard
-                title="Vehicle details"
-                description="Vehicle details remain editable and DVLA lookup stays available."
-                className="print:border print:shadow-none"
-              >
-                <div className="grid gap-4">
-                  <div className="rounded-[24px] border border-[var(--surface-border)] bg-[linear-gradient(135deg,rgba(39,76,119,0.92),rgba(96,150,186,0.86))] p-5 text-white">
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/72">
-                      Registration
-                    </p>
-                    <div className="mt-3 inline-flex rounded-2xl border border-white/20 bg-[#f2c94c] px-4 py-2 text-3xl font-bold tracking-[0.28em] text-slate-900 shadow-sm">
-                      {(vehicleSummary.registration || "NO REG").padEnd(6, " ")}
-                    </div>
-                    <p className="mt-4 text-lg font-semibold text-white">
-                      {vehicleHeadline || "Vehicle details pending"}
-                    </p>
-                    <p className="mt-1 text-sm text-white/78">
-                      {vehicleSpec || "Make, model, fuel and engine details can be updated below."}
-                    </p>
-                  </div>
-
-                  <VehicleLookupFields
-                    initialVehicle={job.vehicle}
-                    onVehicleChange={(vehicle) => setVehicleSummary(vehicle)}
-                  />
-                </div>
-              </DocumentCard>
-            </div>
-
-            <div className="mt-4">
-              <DocumentCard
-                title="Job details"
-                description="Operational details for the booking and workshop scheduling."
-                className="print:border print:shadow-none"
-              >
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-                  <FieldGroup>
-                    <Label htmlFor="jobTypeId">Job type</Label>
-                    <Select id="jobTypeId" name="jobTypeId" defaultValue={job.jobType.id} required>
-                      {jobTypes.map((jobType) => (
-                        <option key={jobType.id} value={jobType.id}>
-                          {jobType.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </FieldGroup>
-                  <FieldGroup>
-                    <Label htmlFor="status">Status</Label>
-                    <Select id="status" name="status" defaultValue={job.status} required>
-                      {JOB_STATUS_OPTIONS.map((statusOption) => (
-                        <option key={statusOption.value} value={statusOption.value}>
-                          {statusOption.label}
-                        </option>
-                      ))}
-                    </Select>
-                  </FieldGroup>
-                  <FieldGroup>
-                    <Label htmlFor="scheduledDate">Scheduled date</Label>
-                    <Input
-                      id="scheduledDate"
-                      name="scheduledDate"
-                      type="date"
-                      defaultValue={toDateInputValue(job.scheduledStart)}
-                      required
-                    />
-                  </FieldGroup>
-                  <FieldGroup>
-                    <Label htmlFor="scheduledTime">Scheduled time</Label>
-                    <Input
-                      id="scheduledTime"
-                      name="scheduledTime"
-                      type="time"
-                      defaultValue={toTimeInputValue(job.scheduledStart)}
-                      required
-                    />
-                  </FieldGroup>
-                  <FieldGroup>
-                    <Label htmlFor="durationMins">Duration (mins)</Label>
-                    <Input
-                      id="durationMins"
-                      name="durationMins"
-                      type="number"
-                      min={15}
-                      step={15}
-                      defaultValue={job.durationMins}
-                      required
-                    />
-                  </FieldGroup>
-                </div>
-              </DocumentCard>
-            </div>
-
-            <div className="mt-4">
-              <DocumentCard
-                title="Work requested"
-                description="Capture the customer's complaint or requested work in a clear workshop-ready format."
-                className="print:border print:shadow-none"
-              >
-                <FieldGroup>
-                  <Label htmlFor="notes">Customer concern / work description</Label>
-                  <Textarea
-                    id="notes"
-                    name="notes"
-                    defaultValue={job.notes ?? ""}
-                    rows={6}
-                    placeholder="Describe the concern, symptoms, or work requested."
-                  />
-                </FieldGroup>
-              </DocumentCard>
-            </div>
-
-            <div className="mt-4">
-              <DocumentCard
-                title="Line items"
-                description="Build up labour, parts, and misc charges while keeping the job card printable."
-                className="print:border print:shadow-none"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-sm text-[var(--muted-foreground)]">
-                      {lineItems.length === 0
-                        ? "No line items added yet."
-                        : `${lineItems.length} ${lineItems.length === 1 ? "line item" : "line items"}`}
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="print:hidden"
-                      onClick={() => setLineItems((current) => [...current, createBlankLineItem()])}
-                    >
-                      <MaterialIcon name="add" className="text-[18px]" />
-                      Add line item
-                    </Button>
-                  </div>
-
-                  {lineItems.length === 0 ? (
-                    <div className="rounded-[24px] border border-dashed border-[var(--surface-border)] bg-[var(--surface-muted)]/18 px-5 py-8 text-center">
-                      <p className="text-base font-semibold text-[var(--foreground)]">
-                        Start building the work order
-                      </p>
-                      <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-                        Add labour, parts, or misc charges to turn this job card into a workshop-ready work order.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto rounded-[24px] border border-[var(--surface-border)]">
-                      <table className="min-w-full border-separate border-spacing-0 bg-white text-sm">
-                        <thead className="bg-[var(--surface-muted)]/36 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
-                          <tr>
-                            <th className="px-4 py-3">Description</th>
-                            <th className="px-4 py-3">Type</th>
-                            <th className="px-4 py-3">Qty</th>
-                            <th className="px-4 py-3">Unit price</th>
-                            <th className="px-4 py-3">Line total</th>
-                            <th className="px-4 py-3 print:hidden" />
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {lineItems.map((lineItem, index) => (
-                            <tr key={lineItem.id} className="align-top">
-                              <td className="border-t border-[var(--surface-border)] px-4 py-3">
-                                <Input
-                                  name="lineItemDescription"
-                                  value={lineItem.description}
-                                  onChange={(event) =>
-                                    updateLineItem(setLineItems, index, {
-                                      description: event.target.value,
-                                    })
-                                  }
-                                  placeholder="Oil and filter service"
-                                />
-                              </td>
-                              <td className="border-t border-[var(--surface-border)] px-4 py-3">
-                                <Select
-                                  name="lineItemType"
-                                  value={lineItem.itemType}
-                                  onChange={(event) =>
-                                    updateLineItem(setLineItems, index, {
-                                      itemType: event.target.value as JobLineItemType,
-                                    })
-                                  }
-                                >
-                                  {LINE_ITEM_TYPE_OPTIONS.map((itemType) => (
-                                    <option key={itemType.value} value={itemType.value}>
-                                      {itemType.label}
-                                    </option>
-                                  ))}
-                                </Select>
-                              </td>
-                              <td className="border-t border-[var(--surface-border)] px-4 py-3">
-                                <Input
-                                  name="lineItemQuantity"
-                                  type="number"
-                                  inputMode="decimal"
-                                  min="0.01"
-                                  step="0.25"
-                                  value={lineItem.quantity}
-                                  onChange={(event) =>
-                                    updateLineItem(setLineItems, index, {
-                                      quantity: event.target.value,
-                                    })
-                                  }
-                                />
-                              </td>
-                              <td className="border-t border-[var(--surface-border)] px-4 py-3">
-                                <Input
-                                  name="lineItemUnitPrice"
-                                  type="number"
-                                  inputMode="decimal"
-                                  min="0"
-                                  step="0.01"
-                                  value={lineItem.unitPrice}
-                                  onChange={(event) =>
-                                    updateLineItem(setLineItems, index, {
-                                      unitPrice: event.target.value,
-                                    })
-                                  }
-                                />
-                              </td>
-                              <td className="border-t border-[var(--surface-border)] px-4 py-3">
-                                <div className="flex h-11 items-center rounded-xl border border-[var(--surface-border)] bg-[var(--surface-muted)]/16 px-3 font-semibold text-[var(--foreground)]">
-                                  {formatCurrency(getLineTotal(lineItem))}
-                                </div>
-                              </td>
-                              <td className="border-t border-[var(--surface-border)] px-4 py-3 print:hidden">
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  aria-label={`Remove line item ${index + 1}`}
-                                  onClick={() =>
-                                    setLineItems((current) =>
-                                      current.filter((_, itemIndex) => itemIndex !== index),
-                                    )
-                                  }
-                                >
-                                  <MaterialIcon name="delete" className="text-[18px]" />
-                                </Button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-
-                  <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
-                    <div className="rounded-[24px] border border-dashed border-[var(--surface-border)] bg-[var(--surface-muted)]/18 p-4 text-sm text-[var(--muted-foreground)] print:hidden">
-                      Line totals update as quantity and unit price change. VAT is laid out here for future use, but not currently applied.
-                    </div>
-                    <div className="rounded-[24px] border border-[var(--surface-border)] bg-[var(--surface-muted)]/18 p-4">
-                      <TotalsRow label="Subtotal" value={formatCurrency(subtotal)} />
-                      <Separator className="my-3" />
-                      <TotalsRow
-                        label="VAT"
-                        value="Not applied"
-                        muted
-                      />
-                      <Separator className="my-3" />
-                      <TotalsRow
-                        label="Total"
-                        value={formatCurrency(total)}
-                        valueClassName="text-lg"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </DocumentCard>
-            </div>
-
-            <div className="mt-4 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-              <DocumentCard
-                title="Workshop notes"
-                description="Internal notes for reception or workshop use."
-                className="print:border print:shadow-none"
-              >
-                <FieldGroup>
-                  <Label htmlFor="internalNotes">Workshop / internal notes</Label>
-                  <Textarea
-                    id="internalNotes"
-                    name="internalNotes"
-                    defaultValue={job.internalNotes ?? ""}
-                    rows={6}
-                    placeholder="Internal notes, parts updates, or reminders."
-                  />
-                </FieldGroup>
-              </DocumentCard>
-
-              <DocumentCard
-                title="Technician notes"
-                description="Keep technician observations separate from the customer request."
-                className="print:border print:shadow-none"
-              >
-                <div className="grid gap-4">
-                  <FieldGroup>
-                    <Label htmlFor="technicianNotes">Technician notes</Label>
+                    <Label htmlFor="notes">Customer concern / requested work</Label>
                     <Textarea
-                      id="technicianNotes"
-                      name="technicianNotes"
-                      defaultValue={job.technicianNotes ?? ""}
-                      rows={6}
-                      placeholder="Findings, checks carried out, or follow-up notes."
+                      id="notes"
+                      name="notes"
+                      defaultValue={job.notes ?? ""}
+                      rows={4}
+                      placeholder="Describe the reason for the booking."
                     />
                   </FieldGroup>
-                  <div className="rounded-[24px] border border-[var(--surface-border)] bg-white/70 p-4 print:bg-white">
-                    <p className="text-sm font-semibold text-[var(--foreground)]">Sign-off</p>
-                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                      <SignOffField label="Technician signature" />
-                      <SignOffField label="Customer approval" />
-                    </div>
-                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                      <SignOffField label="Date" compact />
-                      <SignOffField label="Time" compact />
+                </DocumentCard>
+
+                <DocumentCard
+                  title="Line items"
+                  description="This is the main work-order surface for labour, parts, and misc charges."
+                  bodyClassName="pt-4"
+                >
+                  <LineItemsEditor
+                    lineItems={lineItems}
+                    onAdd={() => setLineItems((current) => [...current, createBlankLineItem()])}
+                    onRemove={(index) =>
+                      setLineItems((current) => current.filter((_, itemIndex) => itemIndex !== index))
+                    }
+                    onUpdate={(index, partial) =>
+                      setLineItems((current) =>
+                        current.map((lineItem, itemIndex) =>
+                          itemIndex === index ? { ...lineItem, ...partial } : lineItem,
+                        ),
+                      )
+                    }
+                  />
+                </DocumentCard>
+              </div>
+
+              <div className="space-y-4">
+                <DocumentCard
+                  title="Totals"
+                  description="Compact summary of the current work-order charges."
+                >
+                  <TotalsRow label="Subtotal" value={formatCurrency(subtotal)} />
+                  <Separator className="my-3" />
+                  <TotalsRow label="VAT" value="Not applied" muted />
+                  <Separator className="my-3" />
+                  <TotalsRow label="Total" value={formatCurrency(total)} valueClassName="text-lg" />
+                </DocumentCard>
+
+                <DocumentCard
+                  title="Workshop notes"
+                  description="Secondary notes for internal and technician use."
+                >
+                  <div className="grid gap-3">
+                    <FieldGroup>
+                      <Label htmlFor="internalNotes">Internal notes</Label>
+                      <Textarea
+                        id="internalNotes"
+                        name="internalNotes"
+                        defaultValue={job.internalNotes ?? ""}
+                        rows={4}
+                        placeholder="Internal notes, parts updates, or reminders."
+                      />
+                    </FieldGroup>
+                    <FieldGroup>
+                      <Label htmlFor="technicianNotes">Technician notes</Label>
+                      <Textarea
+                        id="technicianNotes"
+                        name="technicianNotes"
+                        defaultValue={job.technicianNotes ?? ""}
+                        rows={4}
+                        placeholder="Findings, checks carried out, or follow-up notes."
+                      />
+                    </FieldGroup>
+                    <div className="rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-muted)]/16 p-3 print:bg-white">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
+                        Sign-off
+                      </p>
+                      <div className="mt-3 grid gap-3">
+                        <SignOffField label="Technician signature" />
+                        <SignOffField label="Customer approval" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </DocumentCard>
+                </DocumentCard>
+              </div>
             </div>
 
             {state.error ? (
@@ -636,67 +461,463 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
           </div>
         </CardContent>
       </Card>
+
+      <CustomerEditModal
+        open={activeEditor === "customer"}
+        customer={customer}
+        onOpenChange={(open) => setActiveEditor(open ? "customer" : null)}
+        onCustomerChange={setCustomer}
+      />
+      <VehicleEditModal
+        open={activeEditor === "vehicle"}
+        vehicle={vehicle}
+        onOpenChange={(open) => setActiveEditor(open ? "vehicle" : null)}
+        onVehicleChange={setVehicle}
+      />
+      <JobEditModal
+        open={activeEditor === "job"}
+        jobFields={jobFields}
+        jobTypes={jobTypes}
+        onOpenChange={(open) => setActiveEditor(open ? "job" : null)}
+        onJobFieldsChange={setJobFields}
+      />
     </form>
   );
 }
 
-function updateLineItem(
-  setLineItems: React.Dispatch<React.SetStateAction<EditableLineItem[]>>,
-  index: number,
-  partial: Partial<EditableLineItem>,
-) {
-  setLineItems((current) =>
-    current.map((lineItem, itemIndex) =>
-      itemIndex === index ? { ...lineItem, ...partial } : lineItem,
-    ),
+function HeaderPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-full border border-[var(--surface-border)] bg-white/76 px-3 py-1.5 print:bg-white">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
+        {label}
+      </span>
+      <span className="ml-2 text-sm font-semibold text-[var(--foreground)]">{value}</span>
+    </div>
+  );
+}
+
+function SummaryCard({
+  title,
+  icon,
+  lines,
+  registration,
+  onEdit,
+}: {
+  title: string;
+  icon: string;
+  lines: string[];
+  registration?: string;
+  onEdit: () => void;
+}) {
+  return (
+    <Card className="bg-white">
+      <CardContent className="px-4 py-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="rounded-xl bg-[var(--surface-muted)]/35 p-2 text-[var(--foreground)]">
+              <MaterialIcon name={icon} className="text-[18px]" />
+            </span>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
+                {title}
+              </p>
+              {registration ? (
+                <p className="mt-1 inline-flex rounded-xl bg-[#f2c94c] px-2.5 py-1 text-sm font-bold tracking-[0.22em] text-slate-900">
+                  {registration}
+                </p>
+              ) : null}
+            </div>
+          </div>
+          <Button type="button" variant="ghost" size="sm" className="print:hidden" onClick={onEdit}>
+            <MaterialIcon name="edit" className="text-[16px]" />
+            Edit
+          </Button>
+        </div>
+        <div className="mt-3 space-y-1.5 text-sm text-[var(--foreground)]">
+          {lines.map((line) => (
+            <p key={line} className="truncate">
+              {line}
+            </p>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 function DocumentCard({
   title,
   description,
-  className,
+  bodyClassName,
   children,
 }: React.PropsWithChildren<{
   title: string;
   description?: string;
-  className?: string;
+  bodyClassName?: string;
 }>) {
   return (
-    <Card className={cn("bg-white", className)}>
-      <CardHeader className="border-b border-[var(--surface-border)] pb-4">
-        <CardTitle className="text-base uppercase tracking-[0.08em]">{title}</CardTitle>
+    <Card className="bg-white print:border print:shadow-none">
+      <CardHeader className="border-b border-[var(--surface-border)] px-4 py-4">
+        <CardTitle className="text-sm uppercase tracking-[0.1em]">{title}</CardTitle>
         {description ? (
           <p className="text-sm leading-6 text-[var(--muted-foreground)]">{description}</p>
         ) : null}
       </CardHeader>
-      <CardContent className="pt-5">{children}</CardContent>
+      <CardContent className={cn("px-4 pb-4 pt-4", bodyClassName)}>{children}</CardContent>
     </Card>
   );
 }
 
-function HeaderMeta({ label, value }: { label: string; value: string }) {
+function LineItemsEditor({
+  lineItems,
+  onAdd,
+  onRemove,
+  onUpdate,
+}: {
+  lineItems: EditableLineItem[];
+  onAdd: () => void;
+  onRemove: (index: number) => void;
+  onUpdate: (index: number, partial: Partial<EditableLineItem>) => void;
+}) {
   return (
-    <div className="rounded-2xl border border-[var(--surface-border)] bg-white/70 px-4 py-3 print:bg-white">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
-        {label}
-      </p>
-      <p className="mt-1 font-semibold text-[var(--foreground)]">{value}</p>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-[var(--muted-foreground)]">
+          The first row represents the booked work. Add parts, labour, and misc items underneath as needed.
+        </p>
+        <Button type="button" variant="outline" className="print:hidden" onClick={onAdd}>
+          <MaterialIcon name="add" className="text-[18px]" />
+          Add item
+        </Button>
+      </div>
+
+      <div className="overflow-x-auto rounded-[24px] border border-[var(--surface-border)]">
+        <table className="min-w-full border-separate border-spacing-0 bg-white text-sm">
+          <thead className="bg-[var(--surface-muted)]/28 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
+            <tr>
+              <th className="px-4 py-3">Description</th>
+              <th className="px-4 py-3">Type</th>
+              <th className="px-4 py-3">Qty</th>
+              <th className="px-4 py-3">Unit price</th>
+              <th className="px-4 py-3">Line total</th>
+              <th className="px-4 py-3 print:hidden" />
+            </tr>
+          </thead>
+          <tbody>
+            {lineItems.map((lineItem, index) => (
+              <tr key={lineItem.id} className="align-top">
+                <td className="border-t border-[var(--surface-border)] px-4 py-3">
+                  <Input
+                    name="lineItemDescription"
+                    value={lineItem.description}
+                    onChange={(event) =>
+                      onUpdate(index, {
+                        description: event.target.value,
+                      })
+                    }
+                    placeholder={index === 0 ? "Primary booked work" : "Additional work item"}
+                  />
+                </td>
+                <td className="border-t border-[var(--surface-border)] px-4 py-3">
+                  <Select
+                    name="lineItemType"
+                    value={lineItem.itemType}
+                    onChange={(event) =>
+                      onUpdate(index, {
+                        itemType: event.target.value as JobLineItemType,
+                      })
+                    }
+                  >
+                    {LINE_ITEM_TYPE_OPTIONS.map((itemType) => (
+                      <option key={itemType.value} value={itemType.value}>
+                        {itemType.label}
+                      </option>
+                    ))}
+                  </Select>
+                </td>
+                <td className="border-t border-[var(--surface-border)] px-4 py-3">
+                  <Input
+                    name="lineItemQuantity"
+                    type="number"
+                    inputMode="decimal"
+                    min="0.01"
+                    step="any"
+                    value={lineItem.quantity}
+                    onChange={(event) =>
+                      onUpdate(index, {
+                        quantity: event.target.value,
+                      })
+                    }
+                  />
+                </td>
+                <td className="border-t border-[var(--surface-border)] px-4 py-3">
+                  <Input
+                    name="lineItemUnitPrice"
+                    type="number"
+                    inputMode="decimal"
+                    min="0"
+                    step="0.01"
+                    value={lineItem.unitPrice}
+                    onChange={(event) =>
+                      onUpdate(index, {
+                        unitPrice: event.target.value,
+                      })
+                    }
+                  />
+                </td>
+                <td className="border-t border-[var(--surface-border)] px-4 py-3">
+                  <div className="flex h-11 items-center rounded-xl border border-[var(--surface-border)] bg-[var(--surface-muted)]/16 px-3 font-semibold text-[var(--foreground)]">
+                    {formatCurrency(getLineTotal(lineItem))}
+                  </div>
+                </td>
+                <td className="border-t border-[var(--surface-border)] px-4 py-3 print:hidden">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    disabled={lineItems.length === 1}
+                    aria-label={`Remove line item ${index + 1}`}
+                    onClick={() => onRemove(index)}
+                  >
+                    <MaterialIcon name="delete" className="text-[18px]" />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
+  );
+}
+
+function CustomerEditModal({
+  open,
+  customer,
+  onOpenChange,
+  onCustomerChange,
+}: {
+  open: boolean;
+  customer: CustomerFields;
+  onOpenChange: (open: boolean) => void;
+  onCustomerChange: React.Dispatch<React.SetStateAction<CustomerFields>>;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Edit customer</DialogTitle>
+          <DialogDescription>
+            Keep the top of the job card clean while still letting reception update contact details.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4">
+          <FieldGroup>
+            <Label htmlFor="customer-editor-name">Customer name</Label>
+            <Input
+              id="customer-editor-name"
+              value={customer.name}
+              onChange={(event) =>
+                onCustomerChange((current) => ({
+                  ...current,
+                  name: event.target.value,
+                }))
+              }
+            />
+          </FieldGroup>
+          <FieldGroup>
+            <Label htmlFor="customer-editor-phone">Phone</Label>
+            <Input
+              id="customer-editor-phone"
+              type="tel"
+              value={customer.phone}
+              onChange={(event) =>
+                onCustomerChange((current) => ({
+                  ...current,
+                  phone: event.target.value,
+                }))
+              }
+            />
+          </FieldGroup>
+          <FieldGroup>
+            <Label htmlFor="customer-editor-email">Email</Label>
+            <Input
+              id="customer-editor-email"
+              type="email"
+              value={customer.email}
+              onChange={(event) =>
+                onCustomerChange((current) => ({
+                  ...current,
+                  email: event.target.value,
+                }))
+              }
+            />
+          </FieldGroup>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function VehicleEditModal({
+  open,
+  vehicle,
+  onOpenChange,
+  onVehicleChange,
+}: {
+  open: boolean;
+  vehicle: VehicleFields;
+  onOpenChange: (open: boolean) => void;
+  onVehicleChange: React.Dispatch<React.SetStateAction<VehicleFields>>;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Edit vehicle</DialogTitle>
+          <DialogDescription>
+            DVLA lookup is still available here, while the main job card stays focused on the work order.
+          </DialogDescription>
+        </DialogHeader>
+        <VehicleLookupFields
+          initialVehicle={{
+            registration: vehicle.registration,
+            make: vehicle.make,
+            model: vehicle.model,
+            fuel: vehicle.fuel,
+            year: vehicle.year ? Number(vehicle.year) : null,
+            engineSizeCc: vehicle.engineSizeCc ? Number(vehicle.engineSizeCc) : null,
+          }}
+          onVehicleChange={onVehicleChange}
+          withFormNames={false}
+          idPrefix="vehicle-editor"
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function JobEditModal({
+  open,
+  jobFields,
+  jobTypes,
+  onOpenChange,
+  onJobFieldsChange,
+}: {
+  open: boolean;
+  jobFields: JobFields;
+  jobTypes: Array<{
+    id: string;
+    name: string;
+    color: string;
+  }>;
+  onOpenChange: (open: boolean) => void;
+  onJobFieldsChange: React.Dispatch<React.SetStateAction<JobFields>>;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Edit job details</DialogTitle>
+          <DialogDescription>
+            Keep scheduling and status changes available without turning the whole page into a booking form.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FieldGroup>
+              <Label htmlFor="job-editor-type">Job type</Label>
+              <Select
+                id="job-editor-type"
+                value={jobFields.jobTypeId}
+                onChange={(event) =>
+                  onJobFieldsChange((current) => ({
+                    ...current,
+                    jobTypeId: event.target.value,
+                  }))
+                }
+              >
+                {jobTypes.map((jobType) => (
+                  <option key={jobType.id} value={jobType.id}>
+                    {jobType.name}
+                  </option>
+                ))}
+              </Select>
+            </FieldGroup>
+            <FieldGroup>
+              <Label htmlFor="job-editor-status">Status</Label>
+              <Select
+                id="job-editor-status"
+                value={jobFields.status}
+                onChange={(event) =>
+                  onJobFieldsChange((current) => ({
+                    ...current,
+                    status: event.target.value as JobStatus,
+                  }))
+                }
+              >
+                {JOB_STATUS_OPTIONS.map((statusOption) => (
+                  <option key={statusOption.value} value={statusOption.value}>
+                    {statusOption.label}
+                  </option>
+                ))}
+              </Select>
+            </FieldGroup>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FieldGroup>
+              <Label htmlFor="job-editor-date">Scheduled date</Label>
+              <Input
+                id="job-editor-date"
+                type="date"
+                value={jobFields.scheduledDate}
+                onChange={(event) =>
+                  onJobFieldsChange((current) => ({
+                    ...current,
+                    scheduledDate: event.target.value,
+                  }))
+                }
+              />
+            </FieldGroup>
+            <FieldGroup>
+              <Label htmlFor="job-editor-time">Scheduled time</Label>
+              <Input
+                id="job-editor-time"
+                type="time"
+                value={jobFields.scheduledTime}
+                onChange={(event) =>
+                  onJobFieldsChange((current) => ({
+                    ...current,
+                    scheduledTime: event.target.value,
+                  }))
+                }
+              />
+            </FieldGroup>
+          </div>
+          <FieldGroup>
+            <Label htmlFor="job-editor-duration">Duration (mins)</Label>
+            <Input
+              id="job-editor-duration"
+              type="number"
+              min={15}
+              step={15}
+              value={jobFields.durationMins}
+              onChange={(event) =>
+                onJobFieldsChange((current) => ({
+                  ...current,
+                  durationMins: event.target.value,
+                }))
+              }
+            />
+          </FieldGroup>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
 function FieldGroup({ children }: React.PropsWithChildren) {
   return <div className="grid gap-2">{children}</div>;
-}
-
-function SummaryRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-start justify-between gap-3 text-sm">
-      <span className="font-semibold text-[var(--foreground)]">{label}</span>
-      <span className="text-right text-[var(--muted-foreground)]">{value}</span>
-    </div>
-  );
 }
 
 function TotalsRow({
@@ -733,22 +954,13 @@ function TotalsRow({
   );
 }
 
-function SignOffField({ label, compact = false }: { label: string; compact?: boolean }) {
+function SignOffField({ label }: { label: string }) {
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
         {label}
       </p>
-      <div
-        className={cn(
-          "mt-3 border-b border-dashed border-[var(--surface-border)]",
-          compact ? "h-8" : "h-12",
-        )}
-      />
+      <div className="mt-3 h-10 border-b border-dashed border-[var(--surface-border)]" />
     </div>
   );
-}
-
-function formatEngineSize(vehicle: Pick<VehicleSummaryState, "engineSizeCc">) {
-  return vehicle.engineSizeCc ? `${vehicle.engineSizeCc}cc` : "";
 }

@@ -22,6 +22,7 @@ export async function getScopedJobType(
     },
     select: {
       id: true,
+      name: true,
     },
   });
 

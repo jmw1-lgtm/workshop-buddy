@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/db/prisma";
+import { buildPrimaryJobLineItem, ensurePrimaryJobLineItems } from "@/lib/job-line-items";
 import { getCurrentWorkshopId, requireCurrentWorkshop } from "@/lib/workshop";
 import { JOB_STATUSES, getScopedJobType, resolveCustomerAndVehicle } from "@/services/job-editor";
 
@@ -97,6 +98,12 @@ export async function updateJobCard(
       }
 
       const jobType = await getScopedJobType(tx, workshopId, jobTypeId);
+      const persistedLineItems = ensurePrimaryJobLineItems(lineItems.value, {
+        ...buildPrimaryJobLineItem({
+          jobTypeName: jobType.name,
+          notes,
+        }),
+      });
       const { customer, vehicle } = await resolveCustomerAndVehicle(tx, {
         workshopId,
         registration,
@@ -134,9 +141,9 @@ export async function updateJobCard(
         },
       });
 
-      if (lineItems.value.length > 0) {
+      if (persistedLineItems.length > 0) {
         await tx.jobLineItem.createMany({
-          data: lineItems.value.map((lineItem, index) => ({
+          data: persistedLineItems.map((lineItem, index) => ({
             workshopId,
             jobId: existingJob.id,
             description: lineItem.description,
