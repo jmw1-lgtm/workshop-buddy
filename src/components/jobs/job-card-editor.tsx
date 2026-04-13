@@ -264,6 +264,7 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
   const [customer, setCustomer] = useState<CustomerFields>(() => toCustomerFields(job));
   const [vehicle, setVehicle] = useState<VehicleFields>(() => toVehicleFields(job));
   const [jobFields, setJobFields] = useState<JobFields>(() => toJobFields(job));
+  const [notes, setNotes] = useState(job.notes ?? "");
   const [lineItems, setLineItems] = useState<EditableLineItem[]>(() => toEditableLineItems(job));
   const formId = "job-card-form";
 
@@ -271,6 +272,7 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
     setCustomer(toCustomerFields(job));
     setVehicle(toVehicleFields(job));
     setJobFields(toJobFields(job));
+    setNotes(job.notes ?? "");
     setLineItems(toEditableLineItems(job));
   }, [job]);
 
@@ -305,6 +307,7 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
       <input type="hidden" name="scheduledDate" value={jobFields.scheduledDate} />
       <input type="hidden" name="scheduledTime" value={jobFields.scheduledTime} />
       <input type="hidden" name="durationMins" value={jobFields.durationMins} />
+      <input type="hidden" name="notes" value={notes} />
 
       <Card className="overflow-hidden bg-white print:rounded-none print:border-0 print:shadow-none">
         <CardContent className="px-0 pb-0">
@@ -378,18 +381,13 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
               <div className="space-y-4 xl:col-span-2">
                 <DocumentCard
                   title="Work requested"
-                  description="Keep the booking reason visible while building the work order."
+                  description="Original booking reason."
+                  bodyClassName="pt-3"
                 >
-                  <FieldGroup>
-                    <Label htmlFor="notes">Customer concern / requested work</Label>
-                    <Textarea
-                      id="notes"
-                      name="notes"
-                      defaultValue={job.notes ?? ""}
-                      rows={4}
-                      placeholder="Describe the reason for the booking."
-                    />
-                  </FieldGroup>
+                  <CompactWorkRequestedSummary
+                    notes={notes}
+                    onEdit={() => setActiveEditor("job")}
+                  />
                 </DocumentCard>
 
                 <DocumentCard
@@ -432,36 +430,11 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
                     </div>
                   </div>
                 </DocumentCard>
-
-                <DocumentCard
-                  title="Technician notes"
-                  description="Secondary notes for workshop use."
-                >
-                  <div className="grid gap-3">
-                    <input type="hidden" name="internalNotes" value={job.internalNotes ?? ""} />
-                    <FieldGroup>
-                      <Label htmlFor="technicianNotes">Technician notes</Label>
-                      <Textarea
-                        id="technicianNotes"
-                        name="technicianNotes"
-                        defaultValue={job.technicianNotes ?? ""}
-                        rows={4}
-                        placeholder="Findings, checks carried out, or follow-up notes."
-                      />
-                    </FieldGroup>
-                    <div className="rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-muted)]/16 p-3 print:bg-white">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
-                        Sign-off
-                      </p>
-                      <div className="mt-3 grid gap-3">
-                        <SignOffField label="Technician signature" />
-                        <SignOffField label="Customer approval" />
-                      </div>
-                    </div>
-                  </div>
-                </DocumentCard>
               </div>
             </div>
+
+            <input type="hidden" name="internalNotes" value={job.internalNotes ?? ""} />
+            <input type="hidden" name="technicianNotes" value={job.technicianNotes ?? ""} />
 
             {state.error ? (
               <p className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -491,9 +464,11 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
       <JobEditModal
         open={activeEditor === "job"}
         jobFields={jobFields}
+        notes={notes}
         jobTypes={jobTypes}
         onOpenChange={(open) => setActiveEditor(open ? "job" : null)}
         onJobFieldsChange={setJobFields}
+        onNotesChange={setNotes}
       />
     </form>
   );
@@ -579,6 +554,35 @@ function DocumentCard({
       </CardHeader>
       <CardContent className={cn("px-4 pb-4 pt-4", bodyClassName)}>{children}</CardContent>
     </Card>
+  );
+}
+
+function CompactWorkRequestedSummary({
+  notes,
+  onEdit,
+}: {
+  notes: string;
+  onEdit: () => void;
+}) {
+  const trimmedNotes = notes.trim();
+  const preview =
+    trimmedNotes.length > 180 ? `${trimmedNotes.slice(0, 177).trimEnd()}...` : trimmedNotes;
+
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
+          Customer complaint
+        </p>
+        <p className="mt-1 text-sm leading-6 text-[var(--foreground)]">
+          {preview || "No work requested recorded yet."}
+        </p>
+      </div>
+      <Button type="button" variant="ghost" size="sm" className="shrink-0 print:hidden" onClick={onEdit}>
+        <MaterialIcon name="edit" className="text-[16px]" />
+        Edit
+      </Button>
+    </div>
   );
 }
 
@@ -840,12 +844,15 @@ function VehicleEditModal({
 function JobEditModal({
   open,
   jobFields,
+  notes,
   jobTypes,
   onOpenChange,
   onJobFieldsChange,
+  onNotesChange,
 }: {
   open: boolean;
   jobFields: JobFields;
+  notes: string;
   jobTypes: Array<{
     id: string;
     name: string;
@@ -853,6 +860,7 @@ function JobEditModal({
   }>;
   onOpenChange: (open: boolean) => void;
   onJobFieldsChange: React.Dispatch<React.SetStateAction<JobFields>>;
+  onNotesChange: React.Dispatch<React.SetStateAction<string>>;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -950,6 +958,16 @@ function JobEditModal({
               }
             />
           </FieldGroup>
+          <FieldGroup>
+            <Label htmlFor="job-editor-notes">Work requested</Label>
+            <Textarea
+              id="job-editor-notes"
+              value={notes}
+              onChange={(event) => onNotesChange(event.target.value)}
+              rows={5}
+              placeholder="Describe the reason for the booking."
+            />
+          </FieldGroup>
         </div>
       </DialogContent>
     </Dialog>
@@ -990,17 +1008,6 @@ function TotalsRow({
       >
         {value}
       </span>
-    </div>
-  );
-}
-
-function SignOffField({ label }: { label: string }) {
-  return (
-    <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
-        {label}
-      </p>
-      <div className="mt-3 h-10 border-b border-dashed border-[var(--surface-border)]" />
     </div>
   );
 }
