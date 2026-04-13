@@ -10,6 +10,7 @@ export type JobLineItemSeed = {
 export function buildPrimaryJobLineItem(input: {
   jobTypeName?: string | null;
   notes?: string | null;
+  defaultHourlyLabourRate?: number | null;
 }): JobLineItemSeed {
   const jobTypeName = input.jobTypeName?.trim() ?? "";
   const notes = input.notes?.trim() ?? "";
@@ -18,12 +19,23 @@ export function buildPrimaryJobLineItem(input: {
     description: derivePrimaryLineItemDescription(jobTypeName, notes),
     itemType: "LABOUR",
     quantity: 1,
-    unitPrice: 0,
+    unitPrice: input.defaultHourlyLabourRate ?? 0,
   };
 }
 
 export function ensurePrimaryJobLineItems<T>(lineItems: T[], fallback: T) {
   return lineItems.length > 0 ? lineItems : [fallback];
+}
+
+export function getDefaultUnitPriceForLineItemType(input: {
+  itemType: JobLineItemType;
+  defaultHourlyLabourRate?: number | null;
+}) {
+  if (input.itemType === "LABOUR") {
+    return input.defaultHourlyLabourRate ?? 0;
+  }
+
+  return 0;
 }
 
 function derivePrimaryLineItemDescription(jobTypeName: string, notes: string) {

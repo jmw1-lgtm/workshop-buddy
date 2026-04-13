@@ -1,7 +1,7 @@
 import { prisma } from "@/db/prisma";
 
 export async function getWorkshopSettingsData(workshopId: string) {
-  return prisma.workshop.findUniqueOrThrow({
+  const workshop = await prisma.workshop.findUniqueOrThrow({
     where: {
       id: workshopId,
     },
@@ -11,6 +11,7 @@ export async function getWorkshopSettingsData(workshopId: string) {
       address: true,
       phone: true,
       email: true,
+      defaultHourlyLabourRate: true,
       slotLength: true,
       workingDayStartMins: true,
       workingDayEndMins: true,
@@ -26,4 +27,9 @@ export async function getWorkshopSettingsData(workshopId: string) {
       },
     },
   });
+
+  return {
+    ...workshop,
+    defaultHourlyLabourRate: workshop.defaultHourlyLabourRate?.toNumber() ?? null,
+  };
 }

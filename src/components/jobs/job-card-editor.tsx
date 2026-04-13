@@ -26,7 +26,11 @@ import { Select } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { VehicleLookupFields } from "@/components/vehicles/vehicle-lookup-fields";
-import { buildPrimaryJobLineItem, ensurePrimaryJobLineItems } from "@/lib/job-line-items";
+import {
+  buildPrimaryJobLineItem,
+  ensurePrimaryJobLineItems,
+  getDefaultUnitPriceForLineItemType,
+} from "@/lib/job-line-items";
 import { jobStatusLabels } from "@/lib/job-status";
 import { cn } from "@/lib/utils";
 import type { JobCardData } from "@/services/jobs";
@@ -210,13 +214,18 @@ function getStatusBadgeVariant(status: JobStatus) {
   }
 }
 
-function createBlankLineItem(): EditableLineItem {
+function createBlankLineItem(defaultHourlyLabourRate: number | null): EditableLineItem {
   return {
     id: crypto.randomUUID(),
     description: "",
     itemType: "LABOUR",
     quantity: "1",
-    unitPrice: "0.00",
+    unitPrice: formatEditableNumber(
+      getDefaultUnitPriceForLineItemType({
+        itemType: "LABOUR",
+        defaultHourlyLabourRate,
+      }),
+    ),
   };
 }
 
@@ -234,9 +243,15 @@ function toEditableLineItems(job: JobCardData): EditableLineItem[] {
       ...buildPrimaryJobLineItem({
         jobTypeName: job.jobType.name,
         notes: job.notes,
+        defaultHourlyLabourRate: job.workshop.defaultHourlyLabourRate,
       }),
       quantity: "1",
-      unitPrice: "0.00",
+      unitPrice: formatEditableNumber(
+        getDefaultUnitPriceForLineItemType({
+          itemType: "LABOUR",
+          defaultHourlyLabourRate: job.workshop.defaultHourlyLabourRate,
+        }),
+      ),
     },
   );
 
@@ -267,6 +282,7 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
   const total = subtotal + vatAmount;
   const selectedJobType =
     jobTypes.find((jobType) => jobType.id === jobFields.jobTypeId) ?? job.jobType;
+  const defaultHourlyLabourRate = job.workshop.defaultHourlyLabourRate;
   const vehicleHeadline = [vehicle.make, vehicle.model].filter(Boolean).join(" ");
   const vehicleSpec = [vehicle.year, vehicle.fuel, vehicle.engineSizeCc ? `${vehicle.engineSizeCc}cc` : ""]
     .filter(Boolean)
@@ -359,7 +375,7 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
             </section>
 
             <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_290px]">
-              <div className="space-y-4">
+              <div className="space-y-4 xl:col-span-2">
                 <DocumentCard
                   title="Work requested"
                   description="Keep the booking reason visible while building the work order."
@@ -382,8 +398,14 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
                   bodyClassName="pt-4"
                 >
                   <LineItemsEditor
+                    defaultHourlyLabourRate={defaultHourlyLabourRate}
                     lineItems={lineItems}
-                    onAdd={() => setLineItems((current) => [...current, createBlankLineItem()])}
+                    onAdd={() =>
+                      setLineItems((current) => [
+                        ...current,
+                        createBlankLineItem(defaultHourlyLabourRate),
+                      ])
+                    }
                     onRemove={(index) =>
                       setLineItems((current) => current.filter((_, itemIndex) => itemIndex !== index))
                     }
@@ -395,36 +417,28 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
                       )
                     }
                   />
-                </DocumentCard>
-              </div>
 
-              <div className="space-y-4">
-                <DocumentCard
-                  title="Totals"
-                  description="Compact summary of the current work-order charges."
-                >
-                  <TotalsRow label="Subtotal" value={formatCurrency(subtotal)} />
-                  <Separator className="my-3" />
-                  <TotalsRow label="VAT" value="Not applied" muted />
-                  <Separator className="my-3" />
-                  <TotalsRow label="Total" value={formatCurrency(total)} valueClassName="text-lg" />
+                  <div className="mt-4 flex justify-end">
+                    <div className="w-full max-w-[320px] rounded-[24px] border border-[var(--surface-border)] bg-[var(--surface-muted)]/18 p-4">
+                      <TotalsRow label="Subtotal" value={formatCurrency(subtotal)} />
+                      <Separator className="my-3" />
+                      <TotalsRow label="VAT" value="Not applied" muted />
+                      <Separator className="my-3" />
+                      <TotalsRow
+                        label="Total"
+                        value={formatCurrency(total)}
+                        valueClassName="text-lg"
+                      />
+                    </div>
+                  </div>
                 </DocumentCard>
 
                 <DocumentCard
-                  title="Workshop notes"
-                  description="Secondary notes for internal and technician use."
+                  title="Technician notes"
+                  description="Secondary notes for workshop use."
                 >
                   <div className="grid gap-3">
-                    <FieldGroup>
-                      <Label htmlFor="internalNotes">Internal notes</Label>
-                      <Textarea
-                        id="internalNotes"
-                        name="internalNotes"
-                        defaultValue={job.internalNotes ?? ""}
-                        rows={4}
-                        placeholder="Internal notes, parts updates, or reminders."
-                      />
-                    </FieldGroup>
+                    <input type="hidden" name="internalNotes" value={job.internalNotes ?? ""} />
                     <FieldGroup>
                       <Label htmlFor="technicianNotes">Technician notes</Label>
                       <Textarea
@@ -569,11 +583,13 @@ function DocumentCard({
 }
 
 function LineItemsEditor({
+  defaultHourlyLabourRate,
   lineItems,
   onAdd,
   onRemove,
   onUpdate,
 }: {
+  defaultHourlyLabourRate: number | null;
   lineItems: EditableLineItem[];
   onAdd: () => void;
   onRemove: (index: number) => void;
@@ -623,9 +639,24 @@ function LineItemsEditor({
                     name="lineItemType"
                     value={lineItem.itemType}
                     onChange={(event) =>
-                      onUpdate(index, {
-                        itemType: event.target.value as JobLineItemType,
-                      })
+                      {
+                        const nextItemType = event.target.value as JobLineItemType;
+                        const nextUnitPrice =
+                          nextItemType === "LABOUR" &&
+                          (lineItem.unitPrice === "" || parseDisplayNumber(lineItem.unitPrice) === 0)
+                            ? formatEditableNumber(
+                                getDefaultUnitPriceForLineItemType({
+                                  itemType: nextItemType,
+                                  defaultHourlyLabourRate,
+                                }),
+                              )
+                            : lineItem.unitPrice;
+
+                        onUpdate(index, {
+                          itemType: nextItemType,
+                          unitPrice: nextUnitPrice,
+                        });
+                      }
                     }
                   >
                     {LINE_ITEM_TYPE_OPTIONS.map((itemType) => (
@@ -651,19 +682,28 @@ function LineItemsEditor({
                   />
                 </td>
                 <td className="border-t border-[var(--surface-border)] px-4 py-3">
-                  <Input
-                    name="lineItemUnitPrice"
-                    type="number"
-                    inputMode="decimal"
-                    min="0"
-                    step="0.01"
-                    value={lineItem.unitPrice}
-                    onChange={(event) =>
-                      onUpdate(index, {
-                        unitPrice: event.target.value,
-                      })
-                    }
-                  />
+                  <div className="space-y-2">
+                    <Input
+                      name="lineItemUnitPrice"
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      step="0.01"
+                      value={lineItem.unitPrice}
+                      onChange={(event) =>
+                        onUpdate(index, {
+                          unitPrice: event.target.value,
+                        })
+                      }
+                    />
+                    {lineItem.itemType === "LABOUR" &&
+                    defaultHourlyLabourRate != null &&
+                    parseDisplayNumber(lineItem.unitPrice) === defaultHourlyLabourRate ? (
+                      <p className="text-xs text-[var(--muted-foreground)]">
+                        Using default labour rate ({formatCurrency(defaultHourlyLabourRate)}/hr)
+                      </p>
+                    ) : null}
+                  </div>
                 </td>
                 <td className="border-t border-[var(--surface-border)] px-4 py-3">
                   <div className="flex h-11 items-center rounded-xl border border-[var(--surface-border)] bg-[var(--surface-muted)]/16 px-3 font-semibold text-[var(--foreground)]">

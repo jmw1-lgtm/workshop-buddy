@@ -57,6 +57,7 @@ type SettingsSectionsProps = {
     address: string | null;
     phone: string | null;
     email: string | null;
+    defaultHourlyLabourRate: number | null;
     slotLength: number;
     workingDayStartMins: number;
     workingDayEndMins: number;
@@ -125,6 +126,26 @@ export function SettingsSections({
                     required
                   />
                 </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="defaultHourlyLabourRate">Default hourly labour rate (£/hr)</Label>
+                <Input
+                  id="defaultHourlyLabourRate"
+                  name="defaultHourlyLabourRate"
+                  type="number"
+                  inputMode="decimal"
+                  min="0.01"
+                  step="0.01"
+                  defaultValue={
+                    workshop.defaultHourlyLabourRate != null
+                      ? `${workshop.defaultHourlyLabourRate.toFixed(2)}`
+                      : ""
+                  }
+                  placeholder="85.00"
+                />
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  Prefills new labour line items on job cards. Existing line items are not changed.
+                </p>
               </div>
               <ActionFeedback state={profileState} />
               <div className="flex justify-end">

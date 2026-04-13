@@ -26,10 +26,20 @@ export async function updateWorkshopProfile(
   const address = formData.get("address")?.toString().trim() ?? "";
   const phone = formData.get("phone")?.toString().trim() ?? "";
   const email = formData.get("email")?.toString().trim() ?? "";
+  const defaultHourlyLabourRate = parsePositiveOptionalNumber(
+    formData.get("defaultHourlyLabourRate"),
+  );
 
   if (!name || !address || !phone || !email) {
     return {
       error: "Workshop name, address, phone, and email are required.",
+      success: null,
+    };
+  }
+
+  if (defaultHourlyLabourRate === "invalid") {
+    return {
+      error: "Default hourly labour rate must be greater than zero.",
       success: null,
     };
   }
@@ -43,11 +53,28 @@ export async function updateWorkshopProfile(
       address,
       phone,
       email,
+      defaultHourlyLabourRate,
     },
   });
 
   revalidatePath("/settings");
   return initialSuccess("Workshop profile saved.");
+}
+
+function parsePositiveOptionalNumber(value: FormDataEntryValue | null) {
+  const raw = value?.toString().trim() ?? "";
+
+  if (!raw) {
+    return null;
+  }
+
+  const parsed = Number(raw);
+
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return "invalid" as const;
+  }
+
+  return Math.round(parsed * 100) / 100;
 }
 
 export async function updateDiarySettings(

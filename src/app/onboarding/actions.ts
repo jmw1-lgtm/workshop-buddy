@@ -28,6 +28,9 @@ export async function completeOnboarding(
   const phone = formData.get("phone")?.toString().trim() ?? "";
   const email = formData.get("email")?.toString().trim() ?? "";
   const slotLength = Number(formData.get("slotLength"));
+  const defaultHourlyLabourRate = parsePositiveOptionalNumber(
+    formData.get("defaultHourlyLabourRate"),
+  );
 
   if (!name || !address || !phone || !email) {
     return {
@@ -41,6 +44,12 @@ export async function completeOnboarding(
     };
   }
 
+  if (defaultHourlyLabourRate === "invalid") {
+    return {
+      error: "Default hourly labour rate must be greater than zero.",
+    };
+  }
+
   try {
     await createWorkshopWithOwner({
       clerkUserId: result.clerkUserId,
@@ -49,6 +58,7 @@ export async function completeOnboarding(
       phone,
       email,
       slotLength,
+      defaultHourlyLabourRate,
     });
   } catch {
     return {
@@ -57,4 +67,20 @@ export async function completeOnboarding(
   }
 
   redirect("/dashboard");
+}
+
+function parsePositiveOptionalNumber(value: FormDataEntryValue | null) {
+  const raw = value?.toString().trim() ?? "";
+
+  if (!raw) {
+    return null;
+  }
+
+  const parsed = Number(raw);
+
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return "invalid" as const;
+  }
+
+  return Math.round(parsed * 100) / 100;
 }

@@ -97,11 +97,21 @@ export async function updateJobCard(
         throw new Error("Job not found.");
       }
 
+      const workshop = await tx.workshop.findUniqueOrThrow({
+        where: {
+          id: workshopId,
+        },
+        select: {
+          defaultHourlyLabourRate: true,
+        },
+      });
+
       const jobType = await getScopedJobType(tx, workshopId, jobTypeId);
       const persistedLineItems = ensurePrimaryJobLineItems(lineItems.value, {
         ...buildPrimaryJobLineItem({
           jobTypeName: jobType.name,
           notes,
+          defaultHourlyLabourRate: workshop.defaultHourlyLabourRate?.toNumber() ?? null,
         }),
       });
       const { customer, vehicle } = await resolveCustomerAndVehicle(tx, {

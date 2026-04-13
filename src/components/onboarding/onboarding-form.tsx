@@ -133,6 +133,22 @@ export function OnboardingForm({ defaultEmail }: OnboardingFormProps) {
             </div>
           </fieldset>
 
+          <div className="grid gap-2">
+            <Label htmlFor="defaultHourlyLabourRate">Default hourly labour rate (£/hr)</Label>
+            <Input
+              id="defaultHourlyLabourRate"
+              name="defaultHourlyLabourRate"
+              type="number"
+              inputMode="decimal"
+              min="0.01"
+              step="0.01"
+              placeholder="85.00"
+            />
+            <p className="text-sm text-[var(--muted-foreground)]">
+              Used to prefill new labour line items. You can change it later in Settings.
+            </p>
+          </div>
+
           {state.error ? (
             <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
               {state.error}

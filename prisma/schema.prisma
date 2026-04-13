@@ -44,6 +44,7 @@ model Workshop {
   address              String?
   phone                String?
   email                String?
+  defaultHourlyLabourRate Decimal?  @db.Decimal(10, 2)
   nextJobNumber        Int          @default(1001)
   slotLength           Int          @default(60)
   workingDayStartMins  Int          @default(480)

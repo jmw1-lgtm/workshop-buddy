@@ -76,6 +76,14 @@ export async function createDiaryJob(
   try {
     await prisma.$transaction(async (tx) => {
       const jobType = await getScopedJobType(tx, workshopId, jobTypeId);
+      const workshop = await tx.workshop.findUniqueOrThrow({
+        where: {
+          id: workshopId,
+        },
+        select: {
+          defaultHourlyLabourRate: true,
+        },
+      });
       const jobNumber = await allocateWorkshopJobNumber(tx, workshopId);
       const { customer, vehicle } = await resolveCustomerAndVehicle(tx, {
         workshopId,
@@ -108,6 +116,8 @@ export async function createDiaryJob(
                 ...buildPrimaryJobLineItem({
                   jobTypeName: jobType.name,
                   notes,
+                  defaultHourlyLabourRate:
+                    workshop.defaultHourlyLabourRate?.toNumber() ?? null,
                 }),
                 position: 0,
               },

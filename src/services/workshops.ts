@@ -46,6 +46,7 @@ export type CreateWorkshopInput = {
   phone: string;
   email: string;
   slotLength: 30 | 60;
+  defaultHourlyLabourRate: number | null;
 };
 
 export async function createWorkshopWithOwner(input: CreateWorkshopInput) {
@@ -61,6 +62,7 @@ export async function createWorkshopWithOwner(input: CreateWorkshopInput) {
         address: input.address,
         phone: input.phone,
         email: input.email,
+        defaultHourlyLabourRate: input.defaultHourlyLabourRate,
         slotLength: input.slotLength,
         workingDayStartMins: 8 * 60,
         workingDayEndMins: 18 * 60,

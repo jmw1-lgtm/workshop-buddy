@@ -16,6 +16,7 @@ export type JobCardData = {
     name: string;
     phone: string | null;
     email: string | null;
+    defaultHourlyLabourRate: number | null;
   };
   customer: {
     name: string;
@@ -68,6 +69,7 @@ export async function getJobCardData(input: {
           name: true,
           phone: true,
           email: true,
+          defaultHourlyLabourRate: true,
         },
       },
       customer: {
@@ -116,6 +118,10 @@ export async function getJobCardData(input: {
 
   return {
     ...job,
+    workshop: {
+      ...job.workshop,
+      defaultHourlyLabourRate: job.workshop.defaultHourlyLabourRate?.toNumber() ?? null,
+    },
     lineItems: job.lineItems.map((lineItem) => ({
       ...lineItem,
       itemType: lineItem.itemType,
