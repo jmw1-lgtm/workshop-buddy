@@ -380,8 +380,7 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
             <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_290px]">
               <div className="space-y-4 xl:col-span-2">
                 <DocumentCard
-                  title="Work requested"
-                  description="Original booking reason."
+                  title="Booking notes"
                   bodyClassName="pt-3"
                 >
                   <CompactWorkRequestedSummary
@@ -571,10 +570,7 @@ function CompactWorkRequestedSummary({
   return (
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
-          Customer complaint
-        </p>
-        <p className="mt-1 text-sm leading-6 text-[var(--foreground)]">
+        <p className="text-sm leading-6 text-[var(--foreground)]">
           {preview || "No work requested recorded yet."}
         </p>
       </div>
@@ -959,7 +955,7 @@ function JobEditModal({
             />
           </FieldGroup>
           <FieldGroup>
-            <Label htmlFor="job-editor-notes">Work requested</Label>
+            <Label htmlFor="job-editor-notes">Booking notes</Label>
             <Textarea
               id="job-editor-notes"
               value={notes}
