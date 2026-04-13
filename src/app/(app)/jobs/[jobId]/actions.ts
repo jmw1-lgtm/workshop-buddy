@@ -1,6 +1,6 @@
 "use server";
 
-import { JobStatus } from "@prisma/client";
+import { JobLineItemType, JobStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -37,8 +37,11 @@ export async function updateJobCard(
   const status = formData.get("status")?.toString().trim() as JobStatus;
   const durationMins = Number(formData.get("durationMins"));
   const notes = formData.get("notes")?.toString().trim() ?? "";
+  const internalNotes = formData.get("internalNotes")?.toString().trim() ?? "";
+  const technicianNotes = formData.get("technicianNotes")?.toString().trim() ?? "";
   const scheduledDate = formData.get("scheduledDate")?.toString().trim() ?? "";
   const scheduledTime = formData.get("scheduledTime")?.toString().trim() ?? "";
+  const lineItems = parseLineItems(formData);
 
   if (
     !jobId ||
@@ -65,6 +68,10 @@ export async function updateJobCard(
 
   if (!Number.isFinite(durationMins) || durationMins <= 0) {
     return { error: "Estimated duration must be greater than zero." };
+  }
+
+  if (!lineItems.ok) {
+    return { error: lineItems.error };
   }
 
   const scheduledStart = new Date(`${scheduledDate}T${scheduledTime}:00`);
@@ -115,8 +122,31 @@ export async function updateJobCard(
           status,
           durationMins,
           notes: notes || null,
+          internalNotes: internalNotes || null,
+          technicianNotes: technicianNotes || null,
         },
       });
+
+      await tx.jobLineItem.deleteMany({
+        where: {
+          jobId: existingJob.id,
+          workshopId,
+        },
+      });
+
+      if (lineItems.value.length > 0) {
+        await tx.jobLineItem.createMany({
+          data: lineItems.value.map((lineItem, index) => ({
+            workshopId,
+            jobId: existingJob.id,
+            description: lineItem.description,
+            itemType: lineItem.itemType,
+            quantity: lineItem.quantity,
+            unitPrice: lineItem.unitPrice,
+            position: index,
+          })),
+        });
+      }
     });
   } catch {
     return {
@@ -143,4 +173,82 @@ function parseOptionalInt(value: FormDataEntryValue | null) {
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+const JOB_LINE_ITEM_TYPES = new Set<JobLineItemType>(["LABOUR", "PART", "MISC"]);
+
+function parseLineItems(formData: FormData):
+  | {
+      ok: true;
+      value: Array<{
+        description: string;
+        itemType: JobLineItemType;
+        quantity: number;
+        unitPrice: number;
+      }>;
+    }
+  | { ok: false; error: string } {
+  const descriptions = formData.getAll("lineItemDescription");
+  const itemTypes = formData.getAll("lineItemType");
+  const quantities = formData.getAll("lineItemQuantity");
+  const unitPrices = formData.getAll("lineItemUnitPrice");
+  const rowCount = Math.max(
+    descriptions.length,
+    itemTypes.length,
+    quantities.length,
+    unitPrices.length,
+  );
+  const lineItems: Array<{
+    description: string;
+    itemType: JobLineItemType;
+    quantity: number;
+    unitPrice: number;
+  }> = [];
+
+  for (let index = 0; index < rowCount; index += 1) {
+    const description = descriptions[index]?.toString().trim() ?? "";
+    const itemTypeRaw = itemTypes[index]?.toString().trim() ?? "LABOUR";
+    const quantityValue = quantities[index]?.toString().trim() ?? "";
+    const unitPriceValue = unitPrices[index]?.toString().trim() ?? "";
+    const hasAnyValue = Boolean(description || quantityValue || unitPriceValue);
+
+    const quantityRaw = quantityValue || "1";
+    const unitPriceRaw = unitPriceValue || "0";
+
+    if (!hasAnyValue) {
+      continue;
+    }
+
+    if (!description) {
+      return { ok: false, error: "Each line item needs a description." };
+    }
+
+    if (!JOB_LINE_ITEM_TYPES.has(itemTypeRaw as JobLineItemType)) {
+      return { ok: false, error: "One of the line item types is invalid." };
+    }
+
+    const quantity = Number(quantityRaw);
+    const unitPrice = Number(unitPriceRaw);
+
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      return { ok: false, error: "Each line item quantity must be greater than zero." };
+    }
+
+    if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+      return { ok: false, error: "Each line item unit price must be zero or greater." };
+    }
+
+    lineItems.push({
+      description,
+      itemType: itemTypeRaw as JobLineItemType,
+      quantity: roundCurrencyInput(quantity),
+      unitPrice: roundCurrencyInput(unitPrice),
+    });
+  }
+
+  return { ok: true, value: lineItems };
+}
+
+function roundCurrencyInput(value: number) {
+  return Math.round(value * 100) / 100;
 }

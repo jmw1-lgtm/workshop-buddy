@@ -6,7 +6,12 @@ import { redirect } from "next/navigation";
 
 import { prisma } from "@/db/prisma";
 import { getCurrentWorkshopId, requireCurrentWorkshop } from "@/lib/workshop";
-import { JOB_STATUSES, getScopedJobType, resolveCustomerAndVehicle } from "@/services/job-editor";
+import {
+  JOB_STATUSES,
+  allocateWorkshopJobNumber,
+  getScopedJobType,
+  resolveCustomerAndVehicle,
+} from "@/services/job-editor";
 
 export type JobActionState = {
   error: string | null;
@@ -70,6 +75,7 @@ export async function createDiaryJob(
   try {
     await prisma.$transaction(async (tx) => {
       const jobType = await getScopedJobType(tx, workshopId, jobTypeId);
+      const jobNumber = await allocateWorkshopJobNumber(tx, workshopId);
       const { customer, vehicle } = await resolveCustomerAndVehicle(tx, {
         workshopId,
         registration,
@@ -86,6 +92,7 @@ export async function createDiaryJob(
       await tx.job.create({
         data: {
           workshopId,
+          jobNumber,
           customerId: customer.id,
           vehicleId: vehicle.id,
           jobTypeId: jobType.id,

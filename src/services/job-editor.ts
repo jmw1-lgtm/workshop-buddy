@@ -32,6 +32,27 @@ export async function getScopedJobType(
   return jobType;
 }
 
+export async function allocateWorkshopJobNumber(
+  tx: Prisma.TransactionClient,
+  workshopId: string,
+) {
+  const workshop = await tx.workshop.update({
+    where: {
+      id: workshopId,
+    },
+    data: {
+      nextJobNumber: {
+        increment: 1,
+      },
+    },
+    select: {
+      nextJobNumber: true,
+    },
+  });
+
+  return workshop.nextJobNumber - 1;
+}
+
 export async function resolveCustomerAndVehicle(
   tx: Prisma.TransactionClient,
   input: {

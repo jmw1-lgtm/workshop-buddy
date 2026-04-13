@@ -104,6 +104,7 @@ export async function getCustomersPageData({
             take: 8,
             select: {
               id: true,
+              jobNumber: true,
               scheduledStart: true,
               durationMins: true,
               status: true,

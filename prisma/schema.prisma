@@ -18,6 +18,12 @@ enum JobStatus {
   CANCELLED
 }
 
+enum JobLineItemType {
+  LABOUR
+  PART
+  MISC
+}
+
 enum MembershipRole {
   OWNER
   ADMIN
@@ -38,6 +44,7 @@ model Workshop {
   address              String?
   phone                String?
   email                String?
+  nextJobNumber        Int          @default(1001)
   slotLength           Int          @default(60)
   workingDayStartMins  Int          @default(480)
   workingDayEndMins    Int          @default(1080)
@@ -46,6 +53,7 @@ model Workshop {
   customers            Customer[]
   vehicles             Vehicle[]
   jobs                 Job[]
+  jobLineItems         JobLineItem[]
   jobTypes             JobType[]
   memberships          Membership[]
   subscription         Subscription?
@@ -130,6 +138,7 @@ model JobType {
 model Job {
   id             String     @id @default(cuid())
   workshopId     String
+  jobNumber      Int
   customerId     String
   vehicleId      String
   jobTypeId      String
@@ -137,13 +146,35 @@ model Job {
   scheduledStart DateTime
   durationMins   Int
   notes          String?
+  internalNotes  String?
+  technicianNotes String?
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   workshop       Workshop   @relation(fields: [workshopId], references: [id], onDelete: Cascade)
   customer       Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
   vehicle        Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
   jobType        JobType    @relation(fields: [jobTypeId], references: [id], onDelete: Restrict)
+  lineItems      JobLineItem[]
 
   @@index([workshopId, scheduledStart])
   @@index([workshopId, status])
+  @@unique([workshopId, jobNumber])
+}
+
+model JobLineItem {
+  id             String          @id @default(cuid())
+  workshopId     String
+  jobId          String
+  description    String
+  itemType       JobLineItemType @default(LABOUR)
+  quantity       Decimal         @db.Decimal(10, 2)
+  unitPrice      Decimal         @db.Decimal(10, 2)
+  position       Int             @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  workshop       Workshop        @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  job            Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([workshopId, jobId])
+  @@index([jobId, position])
 }

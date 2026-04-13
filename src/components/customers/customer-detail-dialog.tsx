@@ -46,6 +46,7 @@ type CustomerDetailDialogProps = {
     }>;
     jobs: Array<{
       id: string;
+      jobNumber: number;
       scheduledStart: Date;
       durationMins: number;
       status:
@@ -246,10 +247,10 @@ export function CustomerDetailDialog({
                       >
                         <div>
                           <p className="font-semibold text-[var(--foreground)]">
-                            {formatDisplayDate(job.scheduledStart)}
+                            Job #{job.jobNumber}
                           </p>
                           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                            {job.vehicle.registration}
+                            {formatDisplayDate(job.scheduledStart)} • {job.vehicle.registration}
                           </p>
                         </div>
                         <span
