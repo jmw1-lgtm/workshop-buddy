@@ -379,15 +379,10 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
 
             <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_290px]">
               <div className="space-y-4 xl:col-span-2">
-                <DocumentCard
-                  title="Booking notes"
-                  bodyClassName="pt-3"
-                >
-                  <CompactWorkRequestedSummary
-                    notes={notes}
-                    onEdit={() => setActiveEditor("job")}
-                  />
-                </DocumentCard>
+                <CompactBookingNotesStrip
+                  notes={notes}
+                  onEdit={() => setActiveEditor("job")}
+                />
 
                 <DocumentCard
                   title="Line items"
@@ -556,7 +551,7 @@ function DocumentCard({
   );
 }
 
-function CompactWorkRequestedSummary({
+function CompactBookingNotesStrip({
   notes,
   onEdit,
 }: {
@@ -565,19 +560,30 @@ function CompactWorkRequestedSummary({
 }) {
   const trimmedNotes = notes.trim();
   const preview =
-    trimmedNotes.length > 180 ? `${trimmedNotes.slice(0, 177).trimEnd()}...` : trimmedNotes;
+    trimmedNotes.length > 220 ? `${trimmedNotes.slice(0, 217).trimEnd()}...` : trimmedNotes;
 
   return (
-    <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0 flex-1">
-        <p className="text-sm leading-6 text-[var(--foreground)]">
-          {preview || "No work requested recorded yet."}
-        </p>
+    <div className="rounded-2xl border border-[var(--surface-border)] bg-white px-4 py-3 print:border print:px-3 print:py-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
+            Booking Notes
+          </p>
+          <p className="mt-1 line-clamp-2 text-sm leading-5 text-[var(--foreground)] print:line-clamp-none">
+            {preview || "No booking notes recorded yet."}
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="mt-0.5 shrink-0 print:hidden"
+          onClick={onEdit}
+        >
+          <MaterialIcon name="edit" className="text-[16px]" />
+          Edit
+        </Button>
       </div>
-      <Button type="button" variant="ghost" size="sm" className="shrink-0 print:hidden" onClick={onEdit}>
-        <MaterialIcon name="edit" className="text-[16px]" />
-        Edit
-      </Button>
     </div>
   );
 }
