@@ -10,6 +10,7 @@ import {
 } from "@/app/(app)/jobs/[jobId]/actions";
 import { MaterialIcon } from "@/components/layout/material-icon";
 import { PrintJobCardButton } from "@/components/jobs/print-job-card-button";
+import { useJobStatusUpdate } from "@/components/jobs/use-job-status-update";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +32,7 @@ import {
   ensurePrimaryJobLineItems,
   getDefaultUnitPriceForLineItemType,
 } from "@/lib/job-line-items";
-import { jobStatusLabels } from "@/lib/job-status";
+import { jobStatusLabels, quickJobStatusOptions } from "@/lib/job-status";
 import { cn } from "@/lib/utils";
 import type { JobCardData } from "@/services/jobs";
 
@@ -187,6 +188,16 @@ function formatEditableNumber(value: number) {
   return Number.isInteger(value) ? `${value}` : value.toFixed(2);
 }
 
+function formatCurrencyInputValue(value: string) {
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed)) {
+    return "0.00";
+  }
+
+  return parsed.toFixed(2);
+}
+
 function parseDisplayNumber(value: string) {
   const parsed = Number(value);
 
@@ -195,23 +206,6 @@ function parseDisplayNumber(value: string) {
 
 function getLineTotal(lineItem: EditableLineItem) {
   return parseDisplayNumber(lineItem.quantity) * parseDisplayNumber(lineItem.unitPrice);
-}
-
-function getStatusBadgeVariant(status: JobStatus) {
-  switch (status) {
-    case "COMPLETED":
-      return "success";
-    case "WAITING_PARTS":
-    case "WAITING_COLLECTION":
-      return "warning";
-    case "CANCELLED":
-      return "danger";
-    case "IN_PROGRESS":
-    case "ARRIVED":
-      return "info";
-    default:
-      return "default";
-  }
 }
 
 function createBlankLineItem(defaultHourlyLabourRate: number | null): EditableLineItem {
@@ -266,6 +260,7 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
   const [jobFields, setJobFields] = useState<JobFields>(() => toJobFields(job));
   const [notes, setNotes] = useState(job.notes ?? "");
   const [lineItems, setLineItems] = useState<EditableLineItem[]>(() => toEditableLineItems(job));
+  const statusUpdate = useJobStatusUpdate(job.status);
   const formId = "job-card-form";
 
   useEffect(() => {
@@ -275,6 +270,10 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
     setNotes(job.notes ?? "");
     setLineItems(toEditableLineItems(job));
   }, [job]);
+
+  useEffect(() => {
+    statusUpdate.setStatus(job.status);
+  }, [job.status]);
 
   const subtotal = useMemo(
     () => lineItems.reduce((sum, lineItem) => sum + getLineTotal(lineItem), 0),
@@ -316,15 +315,35 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge className="tracking-[0.12em] uppercase">Work Order</Badge>
-                  <Badge variant={getStatusBadgeVariant(jobFields.status)}>
-                    {jobStatusLabels[jobFields.status]}
-                  </Badge>
                   <Badge variant="default">{selectedJobType.name}</Badge>
                 </div>
                 <div className="flex flex-wrap items-end gap-3">
                   <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-3xl">
                     Work Order #{job.jobNumber}
                   </h1>
+                  <HeaderStatusSelect
+                    value={statusUpdate.status}
+                    pending={statusUpdate.pending}
+                    onChange={async (nextStatus) => {
+                      const previousStatus = jobFields.status;
+                      setJobFields((current) => ({
+                        ...current,
+                        status: nextStatus,
+                      }));
+
+                      const ok = await statusUpdate.updateStatus({
+                        jobId: job.id,
+                        status: nextStatus,
+                      });
+
+                      if (!ok) {
+                        setJobFields((current) => ({
+                          ...current,
+                          status: previousStatus,
+                        }));
+                      }
+                    }}
+                  />
                   <p className="pb-0.5 text-sm font-medium uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
                     {job.workshop.name}
                   </p>
@@ -341,6 +360,9 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
                 <PrintJobCardButton />
               </div>
             </div>
+            {statusUpdate.error ? (
+              <p className="mt-3 text-sm text-rose-700 print:hidden">{statusUpdate.error}</p>
+            ) : null}
           </section>
 
           <div className="px-5 py-4 print:px-0 print:py-3">
@@ -479,6 +501,43 @@ function HeaderPill({ label, value }: { label: string; value: string }) {
   );
 }
 
+function HeaderStatusSelect({
+  value,
+  pending,
+  onChange,
+}: {
+  value: JobStatus;
+  pending: boolean;
+  onChange: (status: JobStatus) => Promise<void>;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-full border px-3 py-1.5",
+        getStatusSelectClasses(value),
+        pending ? "opacity-70" : "",
+      )}
+    >
+      <select
+        aria-label="Update job status"
+        value={value}
+        disabled={pending}
+        onChange={(event) => void onChange(event.target.value as JobStatus)}
+        className="appearance-none bg-transparent pr-7 text-sm font-semibold outline-none"
+      >
+        {quickJobStatusOptions.map((statusOption) => (
+          <option key={statusOption} value={statusOption}>
+            {jobStatusLabels[statusOption]}
+          </option>
+        ))}
+      </select>
+      <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+        <MaterialIcon name="arrow_drop_down" className="text-[18px]" />
+      </span>
+    </div>
+  );
+}
+
 function SummaryCard({
   title,
   icon,
@@ -566,10 +625,10 @@ function CompactBookingNotesStrip({
     <div className="rounded-2xl border border-[var(--surface-border)] bg-white px-4 py-3 print:border print:px-3 print:py-2">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
-            Booking Notes
-          </p>
-          <p className="mt-1 line-clamp-2 text-sm leading-5 text-[var(--foreground)] print:line-clamp-none">
+          <p className="line-clamp-2 text-sm leading-5 text-[var(--foreground)] print:line-clamp-none">
+            <span className="mr-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
+              Booking Notes
+            </span>
             {preview || "No booking notes recorded yet."}
           </p>
         </div>
@@ -688,27 +747,28 @@ function LineItemsEditor({
                   />
                 </td>
                 <td className="border-t border-[var(--surface-border)] px-4 py-3">
-                  <div className="space-y-2">
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-[var(--muted-foreground)]">
+                      £
+                    </span>
                     <Input
                       name="lineItemUnitPrice"
-                      type="number"
+                      type="text"
                       inputMode="decimal"
-                      min="0"
-                      step="0.01"
+                      pattern="^\d*([.]\d{0,2})?$"
                       value={lineItem.unitPrice}
                       onChange={(event) =>
                         onUpdate(index, {
-                          unitPrice: event.target.value,
+                          unitPrice: event.target.value.replace(/[^\d.]/g, ""),
                         })
                       }
+                      onBlur={() =>
+                        onUpdate(index, {
+                          unitPrice: formatCurrencyInputValue(lineItem.unitPrice),
+                        })
+                      }
+                      className="pl-8"
                     />
-                    {lineItem.itemType === "LABOUR" &&
-                    defaultHourlyLabourRate != null &&
-                    parseDisplayNumber(lineItem.unitPrice) === defaultHourlyLabourRate ? (
-                      <p className="text-xs text-[var(--muted-foreground)]">
-                        Using default labour rate ({formatCurrency(defaultHourlyLabourRate)}/hr)
-                      </p>
-                    ) : null}
                   </div>
                 </td>
                 <td className="border-t border-[var(--surface-border)] px-4 py-3">
@@ -1012,4 +1072,22 @@ function TotalsRow({
       </span>
     </div>
   );
+}
+
+function getStatusSelectClasses(status: JobStatus) {
+  switch (status) {
+    case "COMPLETED":
+      return "border-emerald-200 bg-emerald-100 text-emerald-700";
+    case "WAITING_PARTS":
+    case "WAITING_COLLECTION":
+      return "border-amber-200 bg-amber-100 text-amber-700";
+    case "CANCELLED":
+      return "border-rose-200 bg-rose-100 text-rose-700";
+    case "IN_PROGRESS":
+    case "ARRIVED":
+      return "border-sky-200 bg-sky-100 text-sky-700";
+    case "BOOKED":
+    default:
+      return "border-[var(--surface-border)] bg-[var(--surface-muted)] text-[var(--foreground)]";
+  }
 }

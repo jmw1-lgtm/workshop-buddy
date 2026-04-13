@@ -1,5 +1,15 @@
 import { JobStatus } from "@prisma/client";
 
+export const quickJobStatusOptions: JobStatus[] = [
+  "BOOKED",
+  "ARRIVED",
+  "IN_PROGRESS",
+  "WAITING_PARTS",
+  "WAITING_COLLECTION",
+  "COMPLETED",
+  "CANCELLED",
+];
+
 export const jobStatusLabels: Record<JobStatus, string> = {
   BOOKED: "Booked",
   ARRIVED: "Arrived",
