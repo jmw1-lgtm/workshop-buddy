@@ -11,7 +11,6 @@ import {
 import { MaterialIcon } from "@/components/layout/material-icon";
 import { PrintJobCardButton } from "@/components/jobs/print-job-card-button";
 import { useJobStatusUpdate } from "@/components/jobs/use-job-status-update";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -310,14 +309,10 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
 
       <Card className="overflow-hidden bg-white print:rounded-none print:border-0 print:shadow-none">
         <CardContent className="px-0 pb-0">
-          <section className="border-b border-[var(--surface-border)] bg-[linear-gradient(135deg,rgba(163,206,241,0.16),rgba(255,255,255,0.98))] px-5 py-4 print:bg-white print:px-0 print:py-3">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge className="tracking-[0.12em] uppercase">Work Order</Badge>
-                  <Badge variant="default">{selectedJobType.name}</Badge>
-                </div>
-                <div className="flex flex-wrap items-end gap-3">
+          <section className="border-b border-[var(--surface-border)] bg-[linear-gradient(135deg,rgba(163,206,241,0.16),rgba(255,255,255,0.98))] px-5 py-3 print:bg-white print:px-0 print:py-2">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap items-center gap-3">
                   <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-3xl">
                     Work Order #{job.jobNumber}
                   </h1>
@@ -344,15 +339,10 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
                       }
                     }}
                   />
-                  <p className="pb-0.5 text-sm font-medium uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
-                    {job.workshop.name}
-                  </p>
                 </div>
-                <div className="flex flex-wrap gap-2 text-sm">
-                  <HeaderPill label="Scheduled" value={formatLongDate(job.scheduledStart)} />
-                  <HeaderPill label="Time" value={formatTime(job.scheduledStart)} />
-                  <HeaderPill label="Duration" value={`${jobFields.durationMins} mins`} />
-                </div>
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  {formatLongDate(job.scheduledStart)} • {formatTime(job.scheduledStart)} • {jobFields.durationMins} mins
+                </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-3 print:hidden">
@@ -487,17 +477,6 @@ export function JobCardEditor({ job, jobTypes }: JobCardEditorProps) {
         onNotesChange={setNotes}
       />
     </form>
-  );
-}
-
-function HeaderPill({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-full border border-[var(--surface-border)] bg-white/76 px-3 py-1.5 print:bg-white">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
-        {label}
-      </span>
-      <span className="ml-2 text-sm font-semibold text-[var(--foreground)]">{value}</span>
-    </div>
   );
 }
 

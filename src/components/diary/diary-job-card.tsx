@@ -113,18 +113,13 @@ export function DiaryJobCard({
       ref={anchorRef}
       onClick={() => {
         if (!isPending && !isDragging) {
-          setIsMenuOpen((current) => !current);
-        }
-      }}
-      onDoubleClick={() => {
-        if (!isPending) {
           router.push(`/jobs/${job.id}`);
         }
       }}
       onKeyDown={(event) => {
         if ((event.key === "Enter" || event.key === " ") && !isPending) {
           event.preventDefault();
-          setIsMenuOpen((current) => !current);
+          router.push(`/jobs/${job.id}`);
         }
       }}
       onDragStart={(event) => {
@@ -187,13 +182,10 @@ export function DiaryJobCard({
           </div>
           <button
             type="button"
-            className="shrink-0 rounded-full border border-[var(--surface-border)] bg-white/85 px-2 py-1 text-[11px] font-semibold text-[var(--foreground)] shadow-sm transition-colors hover:bg-white"
+            className="shrink-0 cursor-pointer rounded-full border border-[var(--surface-border)] bg-white/85 px-2 py-1 text-[11px] font-semibold text-[var(--foreground)] shadow-sm transition-colors hover:border-[var(--primary)]/25 hover:bg-white"
             onClick={(event) => {
               event.stopPropagation();
               setIsMenuOpen((current) => !current);
-            }}
-            onDoubleClick={(event) => {
-              event.stopPropagation();
             }}
           >
             {jobStatusLabels[statusUpdate.status]}
@@ -222,20 +214,7 @@ export function DiaryJobCard({
             type="button"
             variant="ghost"
             size="sm"
-            className="h-8 rounded-lg px-2 text-xs"
-            onClick={(event) => {
-              event.stopPropagation();
-              setIsMenuOpen((current) => !current);
-            }}
-          >
-            <MaterialIcon name="swap_vert" className="text-[16px]" />
-            Status
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-8 rounded-lg px-2 text-xs"
+            className="ml-auto h-8 rounded-lg px-2 text-xs"
             onClick={(event) => {
               event.stopPropagation();
               router.push(`/jobs/${job.id}`);
