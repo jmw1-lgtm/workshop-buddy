@@ -397,7 +397,7 @@ export function SeoLandingPage({
                 {ctaDescription}
               </p>
               <p className="text-sm font-medium text-[var(--background)]/78">
-                Pricing starts at £49 per month or £490 per year per workshop.
+                Pricing starts at £19 per month or £190 per year per workshop.
               </p>
             </div>
 

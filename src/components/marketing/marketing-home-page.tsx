@@ -78,7 +78,7 @@ const showcaseScreens = [
 const pricingPlans = [
   {
     name: "Monthly",
-    price: "£49",
+    price: "£19",
     cadence: "per workshop / month",
     points: [
       "Workshop diary and booking calendar",
@@ -90,9 +90,9 @@ const pricingPlans = [
   },
   {
     name: "Yearly",
-    price: "£490",
+    price: "£190",
     cadence: "per workshop / year",
-    priceNote: "Equivalent to £41 per month",
+    priceNote: "Equivalent to £15.83 per month",
     points: [
       "Everything in Monthly",
       "Save two months compared with paying monthly",

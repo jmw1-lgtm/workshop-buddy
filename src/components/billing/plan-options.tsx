@@ -16,7 +16,7 @@ export function PlanOptions({
     <div className="grid gap-3 sm:grid-cols-2">
       <PlanCard
         title="Monthly"
-        price="£49"
+        price="£19"
         supportingText="Billed monthly"
         description="Includes diary, customers, and job cards."
         bullets={[
@@ -31,7 +31,7 @@ export function PlanOptions({
       />
       <PlanCard
         title="Yearly"
-        price="£490"
+        price="£190"
         supportingText="Billed yearly"
         description="Includes diary, customers, and job cards."
         bullets={[
