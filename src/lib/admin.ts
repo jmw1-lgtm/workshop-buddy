@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getCurrentClerkUser } from "@/lib/workshop";
+import { isEmailInAdminAllowlist } from "@/lib/admin-permissions";
 
 const configuredAdminEmails =
   process.env.ADMIN_EMAIL_ALLOWLIST?.split(",")
@@ -10,11 +11,7 @@ const configuredAdminEmails =
 export const adminEmailAllowlist = configuredAdminEmails;
 
 export function isAdminEmail(emailAddress?: string | null) {
-  if (!emailAddress) {
-    return false;
-  }
-
-  return adminEmailAllowlist.includes(emailAddress.toLowerCase());
+  return isEmailInAdminAllowlist(emailAddress, adminEmailAllowlist);
 }
 
 export async function requireAdminUser() {

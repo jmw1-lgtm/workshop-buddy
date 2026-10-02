@@ -1,4 +1,5 @@
 import { prisma } from "@/db/prisma";
+import { trackMeaningfulActivity } from "@/services/activity";
 
 export class DiaryScheduleError extends Error {
   status: number;
@@ -82,6 +83,8 @@ export async function rescheduleDiaryJob(input: {
       },
     });
   });
+
+  await trackMeaningfulActivity(input.workshopId);
 }
 
 function normalizeWorkingDayStart(value: number) {

@@ -51,6 +51,9 @@ model Workshop {
   workingDayEndMins    Int          @default(1080)
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
+  activityTrackingStartedAt DateTime?
+  lastLoginAt          DateTime?
+  lastActivityAt       DateTime?
   customers            Customer[]
   vehicles             Vehicle[]
   jobs                 Job[]
@@ -58,6 +61,33 @@ model Workshop {
   jobTypes             JobType[]
   memberships          Membership[]
   subscription         Subscription?
+  authSessions         WorkshopAuthSession[]
+  activityDays         WorkshopActivityDay[]
+}
+
+model WorkshopAuthSession {
+  id             String   @id @default(cuid())
+  workshopId     String
+  clerkSessionId String   @unique
+  loginAt        DateTime
+  createdAt      DateTime @default(now())
+  workshop       Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+
+  @@index([workshopId, loginAt])
+}
+
+model WorkshopActivityDay {
+  id              String   @id @default(cuid())
+  workshopId      String
+  activityDate    DateTime @db.Date
+  firstActivityAt DateTime
+  lastActivityAt  DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  workshop        Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+
+  @@unique([workshopId, activityDate])
+  @@index([workshopId, lastActivityAt])
 }
 
 model Subscription {

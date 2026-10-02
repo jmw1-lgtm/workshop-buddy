@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/db/prisma";
 import { buildPrimaryJobLineItem } from "@/lib/job-line-items";
 import { getCurrentWorkshopId, requireCurrentWorkshop } from "@/lib/workshop";
+import { trackMeaningfulActivity } from "@/services/activity";
 import {
   JOB_STATUSES,
   allocateWorkshopJobNumber,
@@ -132,6 +133,8 @@ export async function createDiaryJob(
     };
   }
 
+  await trackMeaningfulActivity(workshopId);
+
   const dateParam = selectedDateParam || toDateParamFromIso(scheduledStart.toISOString());
   revalidatePath(`/diary?date=${dateParam}`);
   redirect(buildDiaryRedirect(dateParam, selectedView));
@@ -242,6 +245,8 @@ export async function updateDiaryJob(
     };
   }
 
+  await trackMeaningfulActivity(workshopId);
+
   revalidatePath(`/diary?date=${selectedDateParam}`);
   redirect(buildDiaryRedirect(selectedDateParam, selectedView));
 }
@@ -285,6 +290,8 @@ export async function deleteDiaryJob(
       error: "Unable to delete the job right now.",
     };
   }
+
+  await trackMeaningfulActivity(workshopId);
 
   revalidatePath(`/diary?date=${selectedDateParam}`);
   redirect(buildDiaryRedirect(selectedDateParam, selectedView));

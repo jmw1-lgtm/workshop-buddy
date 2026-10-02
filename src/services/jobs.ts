@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { JobLineItemType, JobStatus } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
+import { trackMeaningfulActivity } from "@/services/activity";
 
 export type JobCardData = {
   id: string;
@@ -115,6 +116,8 @@ export async function getJobCardData(input: {
   if (!job) {
     notFound();
   }
+
+  await trackMeaningfulActivity(input.workshopId);
 
   return {
     ...job,

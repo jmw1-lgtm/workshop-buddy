@@ -2,6 +2,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { SubscriptionStatus } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
+import { getReturnedStatus, isActivatedDuringTrial } from "@/lib/admin-analytics";
 import { getStripeSubscriptionSummary, getTrialDaysRemaining } from "@/services/subscriptions";
 
 type AdminFilter = "all" | "trial" | "subscribed" | "inactive";
@@ -11,23 +12,38 @@ export type AdminAccountRow = {
   workshopName: string;
   ownerEmail: string | null;
   createdAt: Date;
+  activityTrackingStartedAt: Date | null;
+  lastLoginAt: Date | null;
+  lastActivityAt: Date | null;
+  activeDays: number | null;
   jobsCreatedCount: number;
+  firstJobCreatedAt: Date | null;
   lastJobCreatedAt: Date | null;
-  lastCustomerCreatedAt: Date | null;
+  activated: boolean;
+  returned: boolean | null;
+  accountStatus: "Trialling" | "Expired" | "Subscribed" | "Inactive";
   trialLabel: string;
+  trialStartedAt: Date | null;
   trialEndsAt: Date | null;
   subscriptionStatus: string;
+  isPaidSubscriber: boolean;
   currentPlan: string | null;
   stripeCustomerId: string | null;
   normalizedFilter: Exclude<AdminFilter, "all"> | "all";
 };
 
+type SummaryMetric = {
+  count: number;
+  total: number;
+};
+
 export type AdminDashboardData = {
   summary: {
-    totalAccounts: number;
-    activeTrials: number;
-    activeSubscriptions: number;
-    inactiveCancelled: number;
+    totalTrials: number;
+    activatedTrials: SummaryMetric;
+    returnedTrials: SummaryMetric;
+    convertedToPaid: SummaryMetric;
+    currentlyActiveTrials: number;
   };
   rows: AdminAccountRow[];
 };
@@ -60,6 +76,21 @@ function getRowFilterState(subscription: {
   }
 
   return "inactive";
+}
+
+function getAccountStatus(subscription: {
+  status: SubscriptionStatus;
+  trialEndsAt: Date;
+} | null): AdminAccountRow["accountStatus"] {
+  if (subscription?.status === "ACTIVE") {
+    return "Subscribed";
+  }
+
+  if (subscription?.status === "TRIAL") {
+    return subscription.trialEndsAt > new Date() ? "Trialling" : "Expired";
+  }
+
+  return "Inactive";
 }
 
 function getTrialLabel(subscription: {
@@ -109,43 +140,26 @@ export async function getAdminDashboardData(input?: {
   const search = input?.search?.trim().toLowerCase() ?? "";
   const filter = normalizeFilter(input?.filter);
 
-  const workshops = await prisma.workshop.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      memberships: {
-        orderBy: {
-          createdAt: "asc",
-        },
+  const [workshops, jobAggregates] = await Promise.all([
+    prisma.workshop.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        memberships: { orderBy: { createdAt: "asc" } },
+        subscription: true,
+        _count: { select: { activityDays: true } },
       },
-      subscription: true,
-      jobs: {
-        select: {
-          createdAt: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: 1,
-      },
-      customers: {
-        select: {
-          createdAt: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: 1,
-      },
-      _count: {
-        select: {
-          jobs: true,
-        },
-      },
-    },
-  });
+    }),
+    prisma.job.groupBy({
+      by: ["workshopId"],
+      _count: { _all: true },
+      _min: { createdAt: true },
+      _max: { createdAt: true },
+    }),
+  ]);
 
+  const jobAggregateMap = new Map(
+    jobAggregates.map((aggregate) => [aggregate.workshopId, aggregate]),
+  );
   const clerkUserIds = Array.from(
     new Set(
       workshops
@@ -170,7 +184,6 @@ export async function getAdminDashboardData(input?: {
   const activeStripeSubscriptionIds = workshops
     .map((workshop) => workshop.subscription?.stripeSubscriptionId ?? null)
     .filter((value): value is string => Boolean(value));
-
   const stripeSummaryMap = new Map(
     await Promise.all(
       activeStripeSubscriptionIds.map(async (subscriptionId) => {
@@ -192,24 +205,51 @@ export async function getAdminDashboardData(input?: {
     const stripeSummary = workshop.subscription?.stripeSubscriptionId
       ? stripeSummaryMap.get(workshop.subscription.stripeSubscriptionId) ?? null
       : null;
+    const jobAggregate = jobAggregateMap.get(workshop.id);
+    const firstJobCreatedAt = jobAggregate?._min.createdAt ?? null;
+    const lastJobCreatedAt = jobAggregate?._max.createdAt ?? null;
+    const trialStartedAt = workshop.subscription?.createdAt ?? null;
+    const trialEndsAt = workshop.subscription?.trialEndsAt ?? null;
+    const activated = isActivatedDuringTrial({
+      firstJobCreatedAt,
+      trialStartedAt,
+      trialEndsAt,
+    });
+    const activeDays = workshop.activityTrackingStartedAt
+      ? workshop._count.activityDays
+      : null;
 
     return {
       workshopId: workshop.id,
       workshopName: workshop.name,
       ownerEmail,
       createdAt: workshop.createdAt,
-      jobsCreatedCount: workshop._count.jobs,
-      lastJobCreatedAt: workshop.jobs[0]?.createdAt ?? null,
-      lastCustomerCreatedAt: workshop.customers[0]?.createdAt ?? null,
+      activityTrackingStartedAt: workshop.activityTrackingStartedAt,
+      lastLoginAt: workshop.lastLoginAt,
+      lastActivityAt: workshop.lastActivityAt,
+      activeDays,
+      jobsCreatedCount: jobAggregate?._count._all ?? 0,
+      firstJobCreatedAt,
+      lastJobCreatedAt,
+      activated,
+      returned: getReturnedStatus(activeDays),
+      accountStatus: getAccountStatus(workshop.subscription),
       trialLabel: getTrialLabel(workshop.subscription),
-      trialEndsAt: workshop.subscription?.trialEndsAt ?? null,
+      trialStartedAt,
+      trialEndsAt,
       subscriptionStatus: getSubscriptionStatusLabel(workshop.subscription),
+      isPaidSubscriber: Boolean(
+        workshop.subscription?.status === "ACTIVE" &&
+          workshop.subscription.stripeSubscriptionId,
+      ),
       currentPlan: stripeSummary?.planLabel ?? null,
       stripeCustomerId: workshop.subscription?.stripeCustomerId ?? null,
       normalizedFilter: filterState,
     };
   });
 
+  const trialRows = allRows.filter((row) => row.trialStartedAt !== null);
+  const totalTrials = trialRows.length;
   const rows = allRows.filter((row) => {
     const matchesFilter = filter === "all" ? true : row.normalizedFilter === filter;
     const matchesSearch =
@@ -222,11 +262,20 @@ export async function getAdminDashboardData(input?: {
 
   return {
     summary: {
-      totalAccounts: allRows.length,
-      activeTrials: allRows.filter((row) => row.normalizedFilter === "trial").length,
-      activeSubscriptions: allRows.filter((row) => row.normalizedFilter === "subscribed")
-        .length,
-      inactiveCancelled: allRows.filter((row) => row.normalizedFilter === "inactive").length,
+      totalTrials,
+      activatedTrials: {
+        count: trialRows.filter((row) => row.activated).length,
+        total: totalTrials,
+      },
+      returnedTrials: {
+        count: trialRows.filter((row) => row.returned === true).length,
+        total: totalTrials,
+      },
+      convertedToPaid: {
+        count: trialRows.filter((row) => row.isPaidSubscriber).length,
+        total: totalTrials,
+      },
+      currentlyActiveTrials: trialRows.filter((row) => row.accountStatus === "Trialling").length,
     },
     rows,
   } satisfies AdminDashboardData;

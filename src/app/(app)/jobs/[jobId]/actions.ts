@@ -8,6 +8,7 @@ import { prisma } from "@/db/prisma";
 import { buildPrimaryJobLineItem, ensurePrimaryJobLineItems } from "@/lib/job-line-items";
 import { getCurrentWorkshopId, requireCurrentWorkshop } from "@/lib/workshop";
 import { JOB_STATUSES, getScopedJobType, resolveCustomerAndVehicle } from "@/services/job-editor";
+import { trackMeaningfulActivity } from "@/services/activity";
 
 export type JobCardActionState = {
   error: string | null;
@@ -170,6 +171,8 @@ export async function updateJobCard(
       error: "Unable to update the job right now.",
     };
   }
+
+  await trackMeaningfulActivity(workshopId);
 
   revalidatePath(`/jobs/${jobId}`);
   revalidatePath(`/diary`);

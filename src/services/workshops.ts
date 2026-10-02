@@ -51,7 +51,8 @@ export type CreateWorkshopInput = {
 
 export async function createWorkshopWithOwner(input: CreateWorkshopInput) {
   const slug = await createUniqueWorkshopSlug(input.name);
-  const trialEndsAt = new Date();
+  const createdAt = new Date();
+  const trialEndsAt = new Date(createdAt);
   trialEndsAt.setDate(trialEndsAt.getDate() + TRIAL_LENGTH_DAYS);
 
   return prisma.$transaction(async (tx) => {
@@ -66,6 +67,7 @@ export async function createWorkshopWithOwner(input: CreateWorkshopInput) {
         slotLength: input.slotLength,
         workingDayStartMins: 8 * 60,
         workingDayEndMins: 18 * 60,
+        activityTrackingStartedAt: createdAt,
       },
     });
 

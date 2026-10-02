@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/db/prisma";
 import { quickJobStatusOptions } from "@/lib/job-status";
+import { trackMeaningfulActivity } from "@/services/activity";
 
 export class JobStatusUpdateError extends Error {
   status: number;
@@ -45,6 +46,8 @@ export async function updateJobStatus(input: {
       status: input.status,
     },
   });
+
+  await trackMeaningfulActivity(input.workshopId);
 
   revalidatePath("/diary");
   revalidatePath(`/jobs/${job.id}`);

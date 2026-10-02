@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 
 import { prisma } from "@/db/prisma";
 import { getCurrentWorkshopId, requireCurrentWorkshop } from "@/lib/workshop";
+import { trackMeaningfulActivity } from "@/services/activity";
 
 export type CustomerActionState = {
   error: string | null;
@@ -49,6 +50,7 @@ export async function createCustomer(
       },
     });
 
+    await trackMeaningfulActivity(workshopId);
     revalidatePath("/customers");
     redirect(`/customers?customerId=${customer.id}`);
   } catch (error) {
@@ -108,6 +110,8 @@ export async function updateCustomerDetails(
 
     return { error: initialError };
   }
+
+  await trackMeaningfulActivity(workshopId);
 
   revalidatePath("/customers");
   redirect(returnTo);

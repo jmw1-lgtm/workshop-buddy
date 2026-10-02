@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { requireAdminUser } from "@/lib/admin";
 import { getAdminDashboardData } from "@/services/admin";
 import { cn } from "@/lib/utils";
+import { getMetricPercentage } from "@/lib/admin-analytics";
 
 type AdminPageProps = {
   searchParams?: Promise<{
@@ -78,28 +79,52 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           </p>
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-4">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <SummaryCard
-            label="Total accounts"
-            value={String(data.summary.totalAccounts)}
+            label="Total trials"
+            value={String(data.summary.totalTrials)}
             icon="domain"
           />
           <SummaryCard
-            label="Active trials"
-            value={String(data.summary.activeTrials)}
-            icon="hourglass_top"
+            label="Activated trials"
+            value={formatSummaryMetric(data.summary.activatedTrials)}
+            icon="task_alt"
           />
           <SummaryCard
-            label="Active subscriptions"
-            value={String(data.summary.activeSubscriptions)}
+            label="Returned"
+            value={formatSummaryMetric(data.summary.returnedTrials)}
+            icon="event_repeat"
+          />
+          <SummaryCard
+            label="Converted to paid"
+            value={formatSummaryMetric(data.summary.convertedToPaid)}
             icon="verified"
           />
           <SummaryCard
-            label="Inactive / cancelled"
-            value={String(data.summary.inactiveCancelled)}
-            icon="pause_circle"
+            label="Currently active trials"
+            value={String(data.summary.currentlyActiveTrials)}
+            icon="hourglass_top"
           />
         </section>
+
+        <Card className="shadow-[0_14px_36px_rgba(39,76,119,0.07)]">
+          <CardContent className="px-5 py-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+              <p className="shrink-0 text-sm font-semibold text-[var(--foreground)]">
+                Trial funnel
+              </p>
+              <div className="flex flex-wrap items-center gap-2 text-sm text-[var(--muted-foreground)]">
+                <FunnelStep label="Sign-ups" value={String(data.summary.totalTrials)} />
+                <FunnelArrow />
+                <FunnelStep label="Created first job" value={formatSummaryMetric(data.summary.activatedTrials)} />
+                <FunnelArrow />
+                <FunnelStep label="Returned another day" value={formatSummaryMetric(data.summary.returnedTrials)} />
+                <FunnelArrow />
+                <FunnelStep label="Paid" value={formatSummaryMetric(data.summary.convertedToPaid)} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="overflow-visible shadow-[0_18px_44px_rgba(39,76,119,0.08)]">
           <CardHeader className="gap-4 border-b border-[var(--surface-border)] bg-[linear-gradient(180deg,rgba(248,250,252,0.96),rgba(231,236,239,0.72))] pb-4">
@@ -175,7 +200,7 @@ function SummaryCard({
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1.5">
             <p className="text-sm font-medium text-[var(--muted-foreground)]">{label}</p>
-            <p className="text-[2rem] font-semibold leading-none tracking-tight text-[var(--foreground)]">
+            <p className="text-xl font-semibold leading-tight tracking-tight text-[var(--foreground)]">
               {value}
             </p>
           </div>
@@ -186,4 +211,23 @@ function SummaryCard({
       </CardContent>
     </Card>
   );
+}
+
+function FunnelStep({ label, value }: { label: string; value: string }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-[var(--surface-border)] bg-[var(--surface-muted)]/55 px-3 py-2">
+      <span>{label}</span>
+      <strong className="text-[var(--foreground)]">{value}</strong>
+    </span>
+  );
+}
+
+function FunnelArrow() {
+  return <MaterialIcon name="arrow_forward" className="text-[17px] text-[var(--muted-foreground)]" />;
+}
+
+function formatSummaryMetric(metric: { count: number; total: number }) {
+  const percentage = getMetricPercentage(metric.count, metric.total);
+
+  return `${metric.count} / ${metric.total} — ${percentage.toFixed(1)}%`;
 }

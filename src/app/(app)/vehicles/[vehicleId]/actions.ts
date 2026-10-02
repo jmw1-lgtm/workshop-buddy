@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { prisma } from "@/db/prisma";
 import { getCurrentWorkshopId, requireCurrentWorkshop } from "@/lib/workshop";
+import { trackMeaningfulActivity } from "@/services/activity";
 
 export type VehicleActionState = {
   error: string | null;
@@ -110,6 +111,8 @@ export async function saveVehicleDetails(
   } catch {
     return { error: initialError };
   }
+
+  await trackMeaningfulActivity(workshopId);
 
   revalidatePath("/customers");
   redirect(returnTo);

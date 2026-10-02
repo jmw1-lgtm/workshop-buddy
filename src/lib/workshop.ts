@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/db/prisma";
+import { recordAuthenticatedSession } from "@/services/activity";
 
 export type CurrentWorkshopContext = {
   clerkUserId: string;
@@ -13,7 +14,7 @@ export type CurrentWorkshopContext = {
 };
 
 export async function getCurrentClerkUser() {
-  const { userId } = await auth();
+  const { userId, sessionId } = await auth();
 
   if (!userId) {
     return null;
@@ -23,6 +24,7 @@ export async function getCurrentClerkUser() {
 
   return {
     clerkUserId: userId,
+    clerkSessionId: sessionId,
     emailAddress: user?.primaryEmailAddress?.emailAddress ?? null,
   };
 }
@@ -48,6 +50,14 @@ export async function getCurrentMembership() {
       ...authUser,
       membership: null,
     };
+  }
+
+  if (authUser.clerkSessionId) {
+    await recordAuthenticatedSession({
+      workshopId: membership.workshopId,
+      clerkUserId: authUser.clerkUserId,
+      clerkSessionId: authUser.clerkSessionId,
+    }).catch(() => undefined);
   }
 
   return {
